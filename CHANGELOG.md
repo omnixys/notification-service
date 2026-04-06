@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.3](https://github.com/omnixys/notification-service/compare/v3.0.2...v3.0.3) (2026-03-13)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/d0d5189cbe54c420d333ba9813b50cff540a78ce))
+
+### Service
+
+* **Service:** major Service update ([](https://github.com/omnixys/notification-service/commit/1adfe7d5a9dc2cb642b0e8c967661c55d9bafa4f))
+
 ## [3.0.2](https://github.com/omnixys/notification-service/compare/v3.0.1...v3.0.2) (2026-03-13)
 
 ### Other
