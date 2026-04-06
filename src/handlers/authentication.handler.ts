@@ -15,22 +15,18 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import {
-  KafkaEvent,
-  KafkaHandler,
-} from '../kafka/decorators/kafka-event.decorator.js';
-import {
-  type KafkaEventContext,
-  KafkaEventHandler,
-} from '../kafka/interface/kafka-event.interface.js';
-import { getTopic, getTopics } from '../kafka/kafka-topic.properties.js';
-import { LoggerPlusService } from '../logger/logger-plus.service.js';
-import { NotificationWriteService } from '../notification/services/notification-write.service.js';
+import { NotificationWriteService } from '../modules/notification/services/notification-write.service.js';
 import { Injectable } from '@nestjs/common';
+
 import {
-  SendMagicLinkMessageDTO,
-  SendResetLinkMessageDTO,
-} from '@omnixys/contracts';
+  IKafkaEventContext,
+  KafkaEvent,
+  KafkaEventHandler,
+  KafkaTopics,
+} from '@omnixys/kafka';
+import { OmnixysLogger } from '@omnixys/logger';
+import { TraceRunner } from '@omnixys/observability';
+import { SendAuthLinkDTO } from '@omnixys/shared';
 
 /**
  * Kafka event handler responsible for useristrative commands such as
@@ -40,9 +36,9 @@ import {
  * @category Messaging
  * @since 1.0.0
  */
-@KafkaHandler('authentication')
+@KafkaEventHandler('authentication')
 @Injectable()
-export class AuthenticationHandler implements KafkaEventHandler {
+export class AuthenticationHandler {
   private readonly logger;
 
   /**
@@ -52,62 +48,42 @@ export class AuthenticationHandler implements KafkaEventHandler {
    * @param userService - The service responsible for handling system-level user operations.
    */
   constructor(
-    private readonly loggerService: LoggerPlusService,
+    loggerService: OmnixysLogger,
     private readonly service: NotificationWriteService,
   ) {
-    this.logger = this.loggerService.getLogger(AuthenticationHandler.name);
+    this.logger = loggerService.log(this.constructor.name);
   }
 
-  /**
-   * Handles incoming Kafka user events and executes the appropriate useristrative command.
-   *
-   * @param topic - The Kafka topic representing the user command (e.g. shutdown, restart).
-   * @param data - The payload associated with the Kafka message.
-   * @param context - The Kafka context metadata containing headers and partition info.
-   *
-   * @returns A Promise that resolves once the command has been processed.
-   */
-  @KafkaEvent(
-    ...getTopics('sendCredentials', 'sendRequestReset', 'sendMagicLink'),
-  )
-  async handle(
-    topic: string,
-    data: SendMagicLinkMessageDTO | SendResetLinkMessageDTO,
-    context: KafkaEventContext,
+  @KafkaEvent(KafkaTopics.notification.sendRequestReset)
+  async handleSendRequestReset(
+    payload: SendAuthLinkDTO,
+    _context: IKafkaEventContext,
   ): Promise<void> {
-    this.logger.warn(`User command received: ${topic}`);
-    this.logger.debug('Kafka context: %o', context);
-    this.logger.debug('Kafka data: %o', data);
-
-    switch (topic) {
-      // case getTopic('sendCredentials'):
-      //   await this.sendCredentials(data as { payload: UserCredentialDTO });
-      //   break;
-
-      case getTopic('sendRequestReset'):
-        await this.sendRequestReset(data);
-        break;
-
-      case getTopic('sendMagicLink'):
-        await this.sendMagigLink(data);
-        break;
-
-      default:
-        this.logger.warn(`Unknown ticket topic: ${topic}`);
-    }
+    return TraceRunner.run('[HANDLER] Send Request Reset', async () => {
+      this.logger.debug('sendRequestReset payload=%o', payload);
+      void this.service.sendRequestReset(payload);
+    });
   }
 
-  // private async sendCredentials(data: {
-  //   payload: UserCredentialDTO;
-  // }): Promise<void> {
-  //   await this.notificationWriteService.sendCredentials(data.payload);
+  @KafkaEvent(KafkaTopics.notification.sendMagicLink)
+  async handleSendMagicLink(
+    payload: SendAuthLinkDTO,
+    _context: IKafkaEventContext,
+        ): Promise < void> {
+    return TraceRunner.run('[HANDLER] Send Magic Link', async () => {
+      this.logger.debug('sendMagicLink payload=%o', payload);
+      void this.service.sendMagicLink(payload);
+    });
+  }
+
+
+  // @KafkaEvent(KafkaTopics.notification.notifyUser)
+  // async handleNotifyUserCreation(
+  //   payload: NotifyUserCreationDTO,
+  //   _context: IKafkaEventContext,
+  // ): Promise<void> {
+  //   this.logger.debug('notifyUser payload=%o', payload);
+
+  //   void this.service.notifyUser(payload);
   // }
-
-  private async sendRequestReset(data: SendResetLinkMessageDTO): Promise<void> {
-    void this.service.sendRequestReset(data.payload);
-  }
-
-  private async sendMagigLink(data: SendMagicLinkMessageDTO): Promise<void> {
-    void this.service.sendMagicLink(data.payload);
-  }
 }

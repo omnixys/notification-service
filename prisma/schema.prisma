@@ -191,3 +191,119 @@ model Notification {
   @@map("notification")
   @@schema("notification")
 }
+
+////////////////////////////////
+// C O N V E R S A T I O N /////
+////////////////////////////////
+
+enum ChatStatus {
+  OPEN
+  ASSIGNED
+  CLOSED
+
+  @@schema("notification")
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  QUEUED
+
+  @@schema("notification")
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+
+  @@schema("notification")
+}
+
+model WhatsAppChat {
+  id      String  @id @default(cuid())
+  chatId  String  @unique
+  name    String?
+  isGroup Boolean @default(false)
+
+  assignedTo String? // userId (Keycloak)
+  status     ChatStatus @default(OPEN)
+
+  lastMessageAt      DateTime?
+  lastMessagePreview String?
+
+  messages     WhatsAppMessage[]
+  assignments  WhatsAppAssignmentHistory[]
+  participants WhatsAppParticipant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assignedTo])
+  @@index([status])
+  @@index([updatedAt])
+  @@index([assignedTo, status])
+  @@schema("notification")
+}
+
+model WhatsAppMessage {
+  id String @id @default(cuid())
+
+  chatRefId String
+  chat      WhatsAppChat @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
+
+  chatId String
+
+  direction MessageDirection
+
+  from String
+  to   String
+
+  body     String?
+  mediaUrl String?
+  mimeType String?
+
+  messageId String? @unique
+
+  status MessageStatus @default(SENT)
+  error  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([chatRefId])
+  @@index([chatId])
+  @@index([createdAt])
+  @@index([status])
+  @@schema("notification")
+}
+
+model WhatsAppAssignmentHistory {
+  id String @id @default(cuid())
+
+  chatRefId String
+  chat      WhatsAppChat @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
+
+  assignedTo String
+  assignedBy String
+
+  createdAt DateTime @default(now())
+
+  @@index([chatRefId])
+  @@schema("notification")
+}
+
+model WhatsAppParticipant {
+  id String @id @default(cuid())
+
+  chatRefId String
+  chat      WhatsAppChat @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
+
+  phone String
+  name  String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([chatRefId, phone])
+  @@schema("notification")
+}

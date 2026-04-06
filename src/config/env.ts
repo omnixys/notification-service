@@ -101,6 +101,7 @@ export const env = {
 
   APP_BASE_URL: process.env.APP_BASE_URL ?? 'http://localhost:3000',
   VERIFY_PATH: process.env.VERIFY_PATH ?? '/verify',
+  VERIFY_GUEST_PATH: process.env.VERIFY_GUEST_PATH ?? '/verify-guest',
   MAGIC_PATH: process.env.MAGIC_PATH ?? '/magic',
   RESET_PATH: process.env.RESET_PATH ?? '/reset',
 
@@ -109,6 +110,7 @@ export const env = {
     process.env.FROM_SUPPORT ?? 'Omnixys Support <support@omnixys.com>',
   FROM_SECURITY:
     process.env.FROM_SECURITY ?? 'Omnixys Security <security@omnixys.com>',
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY ?? 'omnixys-encryption-key',
 } as const;
 
 // /**

@@ -16,14 +16,14 @@
  */
 
 import { AdminModule } from '../admin/admin.module.js';
-import { NotificationModule } from '../notification/notification.module.js';
-import { AdminHandler } from './admin.handler.js';
+import { NotificationModule } from '../modules/notification/notification.module.js';
 import { AuthenticationHandler } from './authentication.handler.js';
+import { InvitationHandler } from './invitation.handler.js';
 import { Module } from '@nestjs/common';
 
 @Module({
   imports: [AdminModule, NotificationModule],
-  providers: [AdminHandler, AuthenticationHandler],
-  exports: [AdminHandler, AuthenticationHandler],
+  providers: [AuthenticationHandler, InvitationHandler],
+  exports: [AuthenticationHandler, InvitationHandler],
 })
 export class HandlerModule {}

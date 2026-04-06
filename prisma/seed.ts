@@ -1,13 +1,14 @@
 import { Channel, ContentFormat, PrismaClient } from '../src/prisma/generated/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import 'dotenv/config';
-import { seedTenant } from './seed/tenant.seed.js';
+import { seedAccountCreatedTemplates } from './seed/account-created.seed.js';
 import { seedInviteTemplates } from './seed/invite.seed.js';
-import { seedAccountTemplates } from './seed/account.seed.js';
 import { seedMagicLinkTemplates } from './seed/magicLink.seed.js';
 import { seedResetPasswordTemplates } from './seed/reset.seed.js';
 import { seedSignUpVerificationTemplates } from './seed/signUpVerification.seed.js';
+import { seedGuestAccountCreatedTemplates } from './seed/guest-account-created.seed.js';
+import { seedTenant } from './seed/tenant.seed.js';
+import 'dotenv/config';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -17,11 +18,12 @@ async function main(): Promise<void> {
 
    const tenant = await seedTenant(prisma)
 
+  await seedAccountCreatedTemplates(prisma, tenant.id);
   await seedInviteTemplates(prisma, tenant.id);
-  await seedAccountTemplates(prisma, tenant.id);
   await seedMagicLinkTemplates(prisma, tenant.id);
   await seedSignUpVerificationTemplates(prisma, tenant.id);
   await seedResetPasswordTemplates(prisma, tenant.id);
+  await seedGuestAccountCreatedTemplates(prisma, tenant.id);
 
   console.log('✅ Templates erfolgreich im neuen Schema geseedet');
 }

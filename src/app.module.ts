@@ -15,61 +15,122 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import { ValkeyAdapterModule } from './adapter/valkey-adapter.module.js';
 import { AdminModule } from './admin/admin.module.js';
+import { BannerService } from './banner.service.js';
 import { env } from './config/env.js';
 import { HandlerModule } from './handlers/handler.module.js';
 import { HealthModule } from './health/health.module.js';
-import { KafkaModule } from './kafka/kafka.module.js';
-import { LoggerModule } from './logger/logger.module.js';
-import { RequestLoggerMiddleware } from './logger/request-logger.middleware.js';
-import { ValkeyModule } from './valkey/valkey.module.js';
-import { ApolloFederationDriver, ApolloFederationDriverConfig } from '@nestjs/apollo';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
-import { AuthModule } from '@omnixys/auth';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { ConversationModule } from './modules/conversation/conversation.module.js';
+import { NotificationModule } from './modules/notification/notification.module.js';
+import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ValkeyModule } from '@omnixys/cache';
+import { OmnixysGraphQLModule } from '@omnixys/graphql';
+import { KafkaModule } from '@omnixys/kafka';
+import { LoggerModule } from '@omnixys/logger';
+import { ObservabilityModule } from '@omnixys/observability';
+import { SecurityModule } from '@omnixys/security';
 
-const { SCHEMA_TARGET } = env;
+const {
+  SCHEMA_TARGET,
+  SERVICE,
+  KAFKA_BROKER,
+  TEMPO_URI,
+  VALKEY_URL,
+  VALKEY_PASSWORD,
+  KC_URL,
+  KC_REALM,
+  ENCRYPTION_KEY,
+} = env;
 
 @Module({
   imports: [
+    OmnixysGraphQLModule.forRoot({
+      autoSchemaFile:
+        SCHEMA_TARGET === 'tmp'
+          ? { path: '/tmp/schema.gql', federation: 2 }
+          : SCHEMA_TARGET === 'false'
+            ? false
+            : { path: 'dist/schema.gql', federation: 2 },
+    }),
+
+    ValkeyModule.forRoot({
+      serviceName: `${SERVICE}`,
+      url: VALKEY_URL,
+      password: VALKEY_PASSWORD,
+
+      pubSub: { enabled: true },
+      streams: { enabled: true },
+    }),
+
+    KafkaModule.forRoot({
+      clientId: `${SERVICE}`,
+      brokers: [KAFKA_BROKER],
+      groupId: `${SERVICE}`,
+      serviceName: SERVICE,
+    }),
+
+    SecurityModule.forRoot({
+      jwt: {
+        issuer: `${KC_URL}/realms/${KC_REALM}`,
+        jwksUri: `${KC_URL}/realms/${KC_REALM}/protocol/openid-connect/certs`,
+      },
+
+      rateLimit: {
+        enabled: true,
+        defaultLimit: 100,
+        defaultWindowMs: 60000,
+        imports: [ValkeyAdapterModule],
+      },
+
+      hash: {
+        encryptionKey: ENCRYPTION_KEY,
+      },
+    }),
+
+    ObservabilityModule.forRoot({
+      serviceName: SERVICE,
+
+      otel: {
+        endpoint: TEMPO_URI,
+        transport: 'http',
+        samplingRatio: 1,
+      },
+
+      metrics: {
+        port: 9464,
+        enabled: true,
+      },
+    }),
+
+    LoggerModule.forRoot({
+      serviceName: SERVICE,
+
+      kafka: {
+        enabled: true,
+        topic: 'logstream.input',
+      },
+      batch: {
+        enabled: true,
+        maxSize: 50,
+        flushInterval: 2000,
+      },
+    }),
+
+    EventEmitterModule.forRoot(),
+
     AdminModule,
     HandlerModule,
     HealthModule,
-    LoggerModule,
-    KafkaModule,
-    ValkeyModule,
-    AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
-    GraphQLModule.forRootAsync<ApolloFederationDriverConfig>({
-      driver: ApolloFederationDriver,
-
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => ({
-        autoSchemaFile:
-          SCHEMA_TARGET === 'tmp'
-            ? { path: '/tmp/schema.gql', federation: 2 }
-            : SCHEMA_TARGET === 'false'
-              ? false
-              : { path: 'dist/schema.gql', federation: 2 },
-        sortSchema: true,
-        playground: cfg.get('GRAPHQL_PLAYGROUND') === 'true',
-        csrfPrevention: false,
-        introspection: true,
-
-        context: ({ req, res }: { req: FastifyRequest; res: FastifyReply }) => ({
-          req,
-          res,
-        }),
-      }),
-    }),
+    ConversationModule,
+    NotificationModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [BannerService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
-  }
+export class AppModule {
+  // configure(consumer: MiddlewareConsumer): void {
+  //   consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  // }
 }
