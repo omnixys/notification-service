@@ -15,21 +15,13 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { MESSAGE_ACK_HANDLER } from '../messages/providers/whatsapp/whatsapp-web.provider.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { ConversationMessageModule } from './modules/message/conversation-message.module.js';
-import { MessageAckService } from './modules/message/message-ack.service.js';
 import { Module } from '@nestjs/common';
 
 @Module({
   imports: [ChatModule, ConversationMessageModule],
-  providers: [
-    MessageAckService,
-    {
-      provide: MESSAGE_ACK_HANDLER,
-      useExisting: MessageAckService,
-    },
-  ],
-  exports: [],
+  providers: [],
+  exports: [ChatModule, ConversationMessageModule],
 })
 export class ConversationModule {}

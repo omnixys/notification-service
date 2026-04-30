@@ -1,26 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { MessageService } from '../../conversation/modules/message/message.service.js';
 import { WhatsAppWebProvider } from '../../messages/providers/whatsapp/whatsapp-web.provider.js';
 import { NotificationWriteService } from '../services/notification-write.service.js';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Field, InputType } from '@nestjs/graphql';
 import { RequestCookies } from '@omnixys/context';
 import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger, LoggingInterceptor } from '@omnixys/logger';
-import { CookieAuthGuard, CurrentUser, CurrentUserData, RoleGuard, Roles } from '@omnixys/security';
+import { CookieAuthGuard, RoleGuard, Roles } from '@omnixys/security';
 import { OmnixysCookieRequest, RealmRoleType } from '@omnixys/shared';
-
-@InputType()
-export class SendMessageInput {
-  @Field()
-  to!: string;
-
-  @Field()
-  message!: string;
-}
 
 @Resolver()
 @UseInterceptors(LoggingInterceptor)
@@ -31,7 +17,6 @@ export class DebugResolver {
     loggerService: OmnixysLogger,
     private readonly notificationWriteService: NotificationWriteService,
     private readonly whatsAppProvider: WhatsAppWebProvider,
-    private readonly messageService: MessageService,
   ) {
     this.logger = loggerService.log(this.constructor.name);
   }
@@ -47,20 +32,6 @@ export class DebugResolver {
   @Query(() => String)
   getWhatsappState(): string {
     return this.whatsAppProvider.getState();
-  }
-
-  @Mutation(() => Boolean)
-    @UseGuards(CookieAuthGuard)
-  async sendTestMessage(
-    @Args('input') input: SendMessageInput,
-    @CurrentUser() user: CurrentUserData,
-  ): Promise<boolean> {
-    const { to, message } = input;
-    this.logger.debug('Sending test message to %s', to);
-
-    await this.messageService.createOutgoing(to, message, user);
-
-    return true;
   }
 
   @Mutation(() => String, { name: 'DEBUG_createSignupVerification' })

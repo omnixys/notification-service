@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -8,10 +7,10 @@
 
 import { env } from '../../../../config/env.js';
 import { SendMailDTO } from '../../models/dto/send-mail.dto.js';
+import { MailProvider } from './mail-provider.interface.js';
 import { Injectable } from '@nestjs/common';
 import { OmnixysLogger } from '@omnixys/logger';
 import { Resend } from 'resend';
-import { MailProvider } from './mail-provider.interface.js';
 
 const { RESEND_API_KEY } = env;
 @Injectable()

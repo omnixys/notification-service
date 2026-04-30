@@ -1,9 +1,10 @@
 // modules/chat/chat.service.ts
 
+import type { WhatsAppChat } from '../../../../prisma/generated/client.js';
+import { PrismaService } from '../../../../prisma/prisma.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyLockService } from '@omnixys/cache';
 import { CurrentUserData } from '@omnixys/security';
-import { PrismaService } from '../../../../prisma/prisma.service.js';
 
 @Injectable()
 export class ChatService {
@@ -12,7 +13,7 @@ export class ChatService {
     private lock: ValkeyLockService,
   ) {}
 
-  async assignChat(chatId: string, userId: string, actor: CurrentUserData) {
+  async assignChat(chatId: string, userId: string, actor: CurrentUserData): Promise<WhatsAppChat> {
     const lockKey = `conversation:chat:assign:${chatId}`;
     const token = await this.lock.acquireLock(lockKey, 3000);
 
@@ -25,13 +26,15 @@ export class ChatService {
         where: { chatId },
       });
 
-      if (!chat) throw new Error('Chat not found');
+      if (!chat) {
+        throw new Error('Chat not found');
+      }
 
       if (chat.status === 'CLOSED') {
         throw new Error('Chat is closed');
       }
 
-      if (chat.assignedTo && chat.assignedTo !== userId && !actor?.roles?.includes('ADMIN')) {
+      if (chat.assignedTo && chat.assignedTo !== userId && !actor?.role?.includes('ADMIN')) {
         throw new Error('Chat already assigned');
       }
 
@@ -58,9 +61,8 @@ export class ChatService {
     }
   }
 
-  async getChats(user: CurrentUserData) {
-    // 🔥 ADMIN sieht alles
-    if (user.roles?.includes('ADMIN')) {
+  async getChats(user: CurrentUserData): Promise<WhatsAppChat[]> {
+    if (user.role?.includes('ADMIN')) {
       return this.prisma.whatsAppChat.findMany({
         orderBy: { updatedAt: 'desc' },
       });

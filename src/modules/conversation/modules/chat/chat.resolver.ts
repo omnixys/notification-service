@@ -1,5 +1,6 @@
 // modules/chat/chat.resolver.ts
 
+import type { WhatsAppChat } from '../../../../prisma/generated/client.js';
 import { ChatService } from './chat.service.js';
 import { Chat } from './entities/chat.entity.js';
 import { UseGuards } from '@nestjs/common';
@@ -26,7 +27,7 @@ export class ChatResolver {
   async claimChat(
     @Args('chatId') chatId: string,
     @CurrentUser() user: CurrentUserData,
-  ) {
+  ): Promise<WhatsAppChat> {
     return this.chatService.assignChat(chatId, user.id, user);
   }
 
@@ -34,15 +35,15 @@ export class ChatResolver {
     @Args('chatId') chatId: string,
     @Args('userId') userId: string,
     @CurrentUser() user: CurrentUserData,
-  ) {
+  ): Promise<WhatsAppChat> {
     return this.chatService.assignChat(chatId, userId, user);
   }
 
   @Query(() => [Chat])
   @UseGuards(CookieAuthGuard)
-  async getChats(@CurrentUser() user: CurrentUserData) {
-    const chats = await this.chatService.getChats(user);
-    console.log({ chats })
-    return chats;
+  async getChats(
+    @CurrentUser() user: CurrentUserData,
+  ): Promise<WhatsAppChat[]> {
+    return this.chatService.getChats(user);
   }
 }

@@ -24,12 +24,22 @@ interface RenderResult {
   renderedBody: string;
 }
 
+export interface SendInvitationVariables {
+  firstName: string;
+  lastName: string;
+  eventName: string;
+  rsvpUrl: string;
+  plusOnes?: number;
+  hostName?: string;
+}
+
 export interface TemplateVariablesMap {
   'auth.password-reset.request': PasswordResetVariables;
   'auth.magic-link.request': MagicLinkVariables;
   'auth.sign-up-verification.request': SignUpVerificationVariables;
   'guest.account.created': CreateGuestVariables;
   'account.created': AccountCreatedVariables;
+  'invitation.event.invite': SendInvitationVariables;
 }
 
 @Injectable()

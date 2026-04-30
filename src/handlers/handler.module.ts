@@ -16,14 +16,16 @@
  */
 
 import { AdminModule } from '../admin/admin.module.js';
+import { MessagingModule } from '../modules/messages/messaging.module.js';
 import { NotificationModule } from '../modules/notification/notification.module.js';
 import { AuthenticationHandler } from './authentication.handler.js';
 import { InvitationHandler } from './invitation.handler.js';
+import { WhatsAppHandler } from './whatsapp.handler.js';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [AdminModule, NotificationModule],
-  providers: [AuthenticationHandler, InvitationHandler],
-  exports: [AuthenticationHandler, InvitationHandler],
+  imports: [AdminModule, NotificationModule, MessagingModule],
+  providers: [AuthenticationHandler, InvitationHandler, WhatsAppHandler],
+  exports: [AuthenticationHandler, InvitationHandler, WhatsAppHandler],
 })
 export class HandlerModule {}

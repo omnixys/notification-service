@@ -69,13 +69,12 @@ export class AuthenticationHandler {
   async handleSendMagicLink(
     payload: SendAuthLinkDTO,
     _context: IKafkaEventContext,
-        ): Promise < void> {
+  ): Promise<void> {
     return TraceRunner.run('[HANDLER] Send Magic Link', async () => {
       this.logger.debug('sendMagicLink payload=%o', payload);
       void this.service.sendMagicLink(payload);
     });
   }
-
 
   // @KafkaEvent(KafkaTopics.notification.notifyUser)
   // async handleNotifyUserCreation(

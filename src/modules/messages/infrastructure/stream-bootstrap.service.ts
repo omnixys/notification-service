@@ -20,8 +20,8 @@ export class StreamBootstrapService implements OnModuleInit {
       });
 
       this.logger.log(`Stream created: ${stream}`);
-    } catch (err: any) {
-      if (err.message?.includes('BUSYGROUP')) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('BUSYGROUP')) {
         this.logger.debug(`Group exists: ${stream}`);
         return;
       }

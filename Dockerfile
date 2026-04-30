@@ -13,12 +13,12 @@
 #
 # For more information, visit <https://www.gnu.org/licenses/>.
 # ---------------------------------------------------------------------------------------
-# Dockerfile – Omnixys Notification Service
+# Dockerfile – Omnixys Authentication Service
 # Multi-stage build optimized for security, reproducibility, and minimal runtime size.
 # ---------------------------------------------------------------------------------------
 # syntax=docker/dockerfile:1.14.0
 
-ARG NODE_VERSION=24.10.0
+ARG NODE_VERSION=25.8.2
 
 # ---------------------------------------------------------------------------------------
 # Stage 0: Base image
@@ -27,7 +27,7 @@ ARG NODE_VERSION=24.10.0
 # ---------------------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS base
 WORKDIR /home/node
-RUN corepack enable pnpm
+RUN npm install -g pnpm@10.33.0
 
 # ---------------------------------------------------------------------------------------
 # Stage 1: Build (dist)
@@ -101,12 +101,12 @@ ENV NODE_ENV=production TZ=UTC
 # dumb-init: lightweight init system for proper signal handling.
 # wget + ca-certificates: used for health checks and secure HTTPS.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends dumb-init wget ca-certificates && \
+    apt-get install -y --no-install-recommends dumb-init wget chromium ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* && \
     mkdir -p /opt/app/log && chown -R node:node /opt/app
 
 # ----- Enable pnpm (runtime) -----
-RUN corepack enable pnpm
+RUN npm install -g pnpm@10.33.0
 
 # ----- Switch to non-root user -----
 USER node

@@ -21,7 +21,6 @@ import { BannerService } from './banner.service.js';
 import { env } from './config/env.js';
 import { HandlerModule } from './handlers/handler.module.js';
 import { HealthModule } from './health/health.module.js';
-import { ConversationModule } from './modules/conversation/conversation.module.js';
 import { NotificationModule } from './modules/notification/notification.module.js';
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -123,7 +122,6 @@ const {
     AdminModule,
     HandlerModule,
     HealthModule,
-    ConversationModule,
     NotificationModule,
   ],
   controllers: [],

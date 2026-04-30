@@ -16,13 +16,13 @@
  */
 import { AppModule } from './app.module.js';
 import { corsOptions } from './config/cors.js';
+import { env } from './config/env.js';
 import compress from '@fastify/compress';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 // import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -136,24 +136,16 @@ async function bootstrap(): Promise<void> {
   });
 
   await app.register(cookie, {
-    secret: process.env.COOKIE_SECRET ?? 'omnixys-default-secret',
+    secret: env.COOKIE_SECRET,
   });
 
   // ======================================================
   // ⚙️ CONFIGURATION
   // ======================================================
 
-  /**
-   * @constant config
-   * Zugriff auf Laufzeitkonfiguration über den NestJS ConfigService.
-   *
-   * Liest Werte aus `.env` oder Umgebungsvariablen.
-   */
-  const config = app.get(ConfigService);
-
   /** Port-Definition (Standard: 4000) */
-  const port = Number(config.get('PORT') ?? 4000);
-  const service = config.get('SERVICE');
+  const port = env.PORT;
+  const service = env.SERVICE;
 
   // ======================================================
   // 🧩 VALIDATION

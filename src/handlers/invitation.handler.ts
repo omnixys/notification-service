@@ -17,10 +17,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache';
-import {
-  CreatePendingUserDTO,
-  GuestNotificationDTO,
-} from '@omnixys/shared';
+import { CreatePendingUserDTO, GuestNotificationDTO } from '@omnixys/shared';
 
 import { NotificationWriteService } from '../modules/notification/services/notification-write.service.js';
 import {
@@ -64,13 +61,13 @@ export class InvitationHandler {
   async handleAddGuestId(
     payload: GuestNotificationDTO,
     context: IKafkaEventContext,
-  ) {
+  ): Promise<void> {
     return TraceRunner.run('[HANDLER] confirmGuest', async () => {
       const { token, eventName, seat, seatId } = payload;
 
       const headers = context.headers;
 
-      console.log({ headers });
+      this.logger.debug('confirmGuest headers=%o', headers);
 
       const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'Unkown';
 
@@ -83,7 +80,7 @@ export class InvitationHandler {
 
       const raw = await this.cache.get(ValkeyKey.pendingContact, token);
 
-      console.log({ raw });
+      this.logger.debug('confirmGuest pending contact found=%s', Boolean(raw));
       if (!raw) {
         this.logger.warn('Token not found or already consumed: %s', token);
         throw new Error('Invalid or expired token');
@@ -101,10 +98,26 @@ export class InvitationHandler {
         await this.service.confirmGuest(finalInput, eventName, seat);
 
         await this.cache.delete(ValkeyKey.pendingContact, token);
-      } catch (e: any) {
-        this.logger.error(e);
-        throw new Error('Already Confirmed bzw. kp');
+      } catch (e: unknown) {
+        this.logger.error(e instanceof Error ? e.message : String(e));
+        throw new Error('Already Confirmed bzw. kp', { cause: e });
       }
     });
   }
+
+  // @KafkaEvent(KafkaTopics.notification.createGuest)
+  // async handleCreateGuest(
+  //   payload: CreatePlusOneAccountDTO,
+  //   context: IKafkaEventContext,
+  // ): Promise<void> {
+  //   return TraceRunner.run('[HANDLER] Create Guest', async () => {
+  //     const headers = context.headers;
+  //     const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'Unkown';
+
+  //     this.logger.debug('handleCreateGuest: %o | actorId=%s', payload, actorId);
+
+  //     await this.userWriteService.createGuestUser();
+  //     await this.adminWriteService.deleteUser(payload.userId, actorId);
+  //   });
+  // }
 }

@@ -8,5 +8,5 @@ export function safeJson(
   if (value === undefined || value === null) {
     return Prisma.JsonNull;
   }
-  return value as Prisma.InputJsonValue;
+  return value;
 }

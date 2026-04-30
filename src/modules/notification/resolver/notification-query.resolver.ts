@@ -6,7 +6,11 @@ import { NotificationPayload } from '../models/payloads/notification.payload.js'
 import { NotificationReadService } from '../services/notification-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { OmnixysLogger } from '@omnixys/logger';
-import { CookieAuthGuard, CurrentUser, CurrentUserData } from '@omnixys/security';
+import {
+  CookieAuthGuard,
+  CurrentUser,
+  CurrentUserData,
+} from '@omnixys/security';
 
 @Resolver()
 export class NotificationQueryResolver {
@@ -61,9 +65,9 @@ export class NotificationQueryResolver {
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ): Promise<NotificationPayload[]> {
     if (!currentUser) {
-      throw new Error('Not Authenticated')
+      throw new Error('Not Authenticated');
     }
-    
+
     this.logger.debug(
       'notificationsByUser: recipientId=%s limit=%s',
       currentUser.id,

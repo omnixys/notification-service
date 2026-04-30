@@ -53,10 +53,11 @@ export class EventHandler {
     this.logger = this.omnixysLogger.log(this.constructor.name);
   }
 
-
-
-  @KafkaEvent(KafkaTopics.notification.eventCancelled,)
-  async handleNotifyEventCancelled(payload: EventCancelNotificationDTO, context: IKafkaEventContext) {
+  @KafkaEvent(KafkaTopics.notification.eventCancelled)
+  async handleNotifyEventCancelled(
+    payload: EventCancelNotificationDTO,
+    context: IKafkaEventContext,
+  ): Promise<void> {
     return TraceRunner.run('[HANDLER] handleNotifyEventCancelled', async () => {
       // const { eventIds, admins, security, guests} = payload;
       const headers = context.headers;
@@ -71,5 +72,4 @@ export class EventHandler {
       // await this.notificationWriteService.deleteByEventIds(payload.eventIds);
     });
   }
-
 }

@@ -1,14 +1,21 @@
-import { NotificationStatus, Priority, Prisma } from '../../../prisma/generated/client.js';
 import { env } from '../../../config/env.js';
+import {
+  Notification,
+  NotificationStatus,
+  Priority,
+  Prisma,
+} from '../../../prisma/generated/client.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { MailService } from '../../messages/services/mail.service.js';
 import { WhatsAppService } from '../../messages/services/whatsapp.service.js';
 import { Channel } from '../models/enums/channel.enum.js';
+import { BulkInvitationDTO } from '../models/inputs/send-invitations.input.js';
 import { getVerificationChannelLabel } from '../models/mappers/verification-channel-label.mapper.js';
+import { AccountCreatedVariables } from '../models/variables/account-create-notification.variables..js';
 import { CreateGuestVariables } from '../models/variables/create-guest.variables.js';
 import { formatRequestTime } from '../utils/date.util.js';
 import { NotificationCacheService } from './notification-cache.service.js';
-import { TemplateRenderService } from './template-renderer.service.js';
+import { SendInvitationVariables, TemplateRenderService } from './template-renderer.service.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger } from '@omnixys/logger';
@@ -34,6 +41,16 @@ const {
   FROM_SUPPORT,
   FROM_NO_REPLY,
 } = env;
+
+interface NotifyUserCreationEvent {
+  payload: {
+    email?: string;
+    phoneNumber?: string;
+    username: string;
+    locale?: Locale;
+  };
+}
+
 export interface CreateNotificationDTO {
   tenantId?: string;
   recipientUsername: string;
@@ -73,44 +90,40 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // CREATE (Idempotent optional)
   // ─────────────────────────────────────────────
-  async create(input: CreateNotificationDTO) {
+  async create(input: CreateNotificationDTO): Promise<Notification> {
     this.logger.debug('create notification: %o', {
       ...input,
       variables: '[masked]',
     });
 
-    try {
-      return await this.prisma.notification.create({
-        data: {
-          tenantId: input.tenantId ?? null,
-          recipientUsername: input.recipientUsername,
-          recipientId: input.recipientId ?? null,
-          recipientAddress: input.recipientAddress ?? null,
+    return this.prisma.notification.create({
+      data: {
+        tenantId: input.tenantId ?? null,
+        recipientUsername: input.recipientUsername,
+        recipientId: input.recipientId ?? null,
+        recipientAddress: input.recipientAddress ?? null,
 
-          templateId: input.templateId ?? null,
+        templateId: input.templateId ?? null,
 
-          channel: input.channel,
-          priority: input.priority ?? 'NORMAL',
+        channel: input.channel,
+        priority: input.priority ?? 'NORMAL',
 
-          variables: input.variables ?? {},
-          metadata: input.metadata ?? {},
+        variables: input.variables ?? {},
+        metadata: input.metadata ?? {},
 
-          sensitive: input.sensitive ?? false,
-          expiresAt: input.expiresAt ?? null,
+        sensitive: input.sensitive ?? false,
+        expiresAt: input.expiresAt ?? null,
 
-          status: NotificationStatus.PENDING,
-          createdBy: input.createdBy ?? null,
-        },
-      });
-    } catch (e: any) {
-      throw e;
-    }
+        status: NotificationStatus.PENDING,
+        createdBy: input.createdBy ?? null,
+      },
+    });
   }
 
   // ─────────────────────────────────────────────
   // MARK AS READ
   // ─────────────────────────────────────────────
-  async markAsRead(id: string) {
+  async markAsRead(id: string): Promise<Notification> {
     const existing = await this.findOrThrow(id);
 
     if (existing.readAt) {
@@ -128,7 +141,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // MARK AS UNREAD
   // ─────────────────────────────────────────────
-  async markAsUnread(id: string) {
+  async markAsUnread(id: string): Promise<Notification> {
     await this.findOrThrow(id);
 
     return this.prisma.notification.update({
@@ -142,7 +155,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // ARCHIVE
   // ─────────────────────────────────────────────
-  async archive(id: string) {
+  async archive(id: string): Promise<Notification> {
     const existing = await this.findOrThrow(id);
 
     if (existing.archivedAt) {
@@ -158,7 +171,7 @@ export class NotificationWriteService {
     });
   }
 
-  async unarchive(id: string) {
+  async unarchive(id: string): Promise<Notification> {
     const existing = await this.findOrThrow(id);
 
     if (!existing.archivedAt) {
@@ -177,7 +190,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // CANCEL (only before sent/delivered)
   // ─────────────────────────────────────────────
-  async cancel(id: string) {
+  async cancel(id: string): Promise<Notification> {
     const existing = await this.findOrThrow(id);
 
     if (
@@ -198,7 +211,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // DELETE
   // ─────────────────────────────────────────────
-  async delete(id: string) {
+  async delete(id: string): Promise<Notification> {
     await this.findOrThrow(id);
 
     return this.prisma.notification.delete({
@@ -209,7 +222,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   // BULK OPERATIONS
   // ─────────────────────────────────────────────
-  async markAsReadBulk(ids: string[]) {
+  async markAsReadBulk(ids: string[]): Promise<Prisma.BatchPayload | void> {
     if (!ids.length) {
       return;
     }
@@ -225,7 +238,7 @@ export class NotificationWriteService {
     });
   }
 
-  async archiveBulk(ids: string[]) {
+  async archiveBulk(ids: string[]): Promise<Prisma.BatchPayload | void> {
     if (!ids.length) {
       return;
     }
@@ -241,7 +254,7 @@ export class NotificationWriteService {
     });
   }
 
-  async deleteBulk(ids: string[]) {
+  async deleteBulk(ids: string[]): Promise<Prisma.BatchPayload | void> {
     if (!ids.length) {
       return;
     }
@@ -257,7 +270,7 @@ export class NotificationWriteService {
   // INTERNAL HELPER
   // ─────────────────────────────────────────────
 
-  private async findOrThrow(id: string) {
+  private async findOrThrow(id: string): Promise<Notification> {
     const entity = await this.prisma.notification.findUnique({
       where: { id },
     });
@@ -278,7 +291,7 @@ export class NotificationWriteService {
       provider?: string;
       providerRef?: string;
     },
-  ) {
+  ): Promise<Notification> {
     const existing = await this.findOrThrow(id);
 
     // State validation
@@ -308,7 +321,7 @@ export class NotificationWriteService {
   }: {
     createUserInput: CreateUserInput;
     locale: Locale;
-  }) {
+  }): Promise<string> {
     return TraceRunner.run('Create SignUp Verification', async () => {
       this.logger.debug('creating signUp verification');
 
@@ -325,7 +338,7 @@ export class NotificationWriteService {
         timestamp: Date.now(),
       };
 
-      const verificationId = await this.encryptService.encrypt(JSON.stringify(payload), true);
+      const verificationId = this.encryptService.encrypt(JSON.stringify(payload), true);
 
       const verifyUrl = `${APP_BASE_URL}${VERIFY_PATH}?token=${verificationId}`;
       this.logger.debug('Created Verify Link %s', verifyUrl);
@@ -389,7 +402,7 @@ export class NotificationWriteService {
     });
   }
 
-  async confirmGuest(input: CreatePendingUserDTO, eventName: string, seat?: string) {
+  async confirmGuest(input: CreatePendingUserDTO, eventName: string, seat?: string): Promise<void> {
     return TraceRunner.run('Create Guest SignUp Verification', async () => {
       this.logger.debug('creating Guest signUp verification');
 
@@ -402,7 +415,7 @@ export class NotificationWriteService {
         timestamp: Date.now(),
       };
 
-      const verificationId = await this.encryptService.encrypt(JSON.stringify(payload), true);
+      const verificationId = this.encryptService.encrypt(JSON.stringify(payload), true);
 
       const verifyUrl = `${APP_BASE_URL}${VERIFY_GUEST_PATH}?token=${verificationId}`;
       this.logger.debug('Created Guest Verify Link %s', verifyUrl);
@@ -474,7 +487,15 @@ export class NotificationWriteService {
     });
   }
 
-  async sendMagicLink({ token, email, locale, username, device, ip, location }: SendAuthLinkDTO) {
+  async sendMagicLink({
+    token,
+    email,
+    locale,
+    username,
+    device,
+    ip,
+    location,
+  }: SendAuthLinkDTO): Promise<void> {
     this.logger.debug('creating Magic Link');
 
     const magicLink = `${APP_BASE_URL}${MAGIC_PATH}?token=${encodeURIComponent(token)}`;
@@ -549,7 +570,7 @@ export class NotificationWriteService {
     device,
     ip,
     location,
-  }: SendAuthLinkDTO) {
+  }: SendAuthLinkDTO): Promise<void> {
     this.logger.debug('creating Reset Link');
 
     const resetLink = `${APP_BASE_URL}${RESET_PATH}?token=${encodeURIComponent(token)}`;
@@ -617,7 +638,7 @@ export class NotificationWriteService {
     });
   }
 
-  async notifyUser(data: any): Promise<void> {
+  async notifyUser(data: NotifyUserCreationEvent): Promise<void> {
     return TraceRunner.run('Notify User Creation', async () => {
       this.logger.debug('Notifying user creation: %o', data);
 
@@ -631,7 +652,7 @@ export class NotificationWriteService {
       /**
        * 2️⃣ Build Variables (single source of truth)
        */
-      const variables = {
+      const variables: AccountCreatedVariables = {
         username,
         actionUrl: `${APP_BASE_URL}/welcome`,
         expiresInMinutes: 60 * 24,
@@ -659,7 +680,7 @@ export class NotificationWriteService {
         channel,
         priority: Priority.NORMAL,
         templateId,
-        variables,
+        variables: variables as unknown as InputJsonValue,
         metadata: {
           flow: 'notify-user-creation',
           resolvedChannel: channel,
@@ -689,6 +710,81 @@ export class NotificationWriteService {
     });
   }
 
+  async sendBulkInvitations(input: BulkInvitationDTO): Promise<BulkInvitationDTO['guests']> {
+    return TraceRunner.run('[INVITATION] sendBulkInvitations', async () => {
+      this.logger.debug('sendBulkInvitations: inpu=%o', input);
+      const results = [];
+      const error: BulkInvitationDTO['guests'] = [];
+
+      for (const guest of input.guests) {
+        const locale = guest.locale ?? 'de-DE';
+
+        const variables: SendInvitationVariables = {
+          firstName: guest.firstName,
+          lastName: guest.lastName,
+          eventName: guest.eventName,
+          rsvpUrl: guest.rsvpUrl,
+          plusOnes: guest.plusOnes ?? undefined,
+          hostName: input.hostName ?? undefined,
+        };
+
+        const phoneNumber = getPrimaryPhoneNumber(guest.phoneNumbers);
+
+        if (!phoneNumber && !guest.email) {
+          this.logger.debug('sendBulkInvitations: NO Contact INFO SKIP!!');
+          error.push(guest);
+          continue;
+        }
+        const channel = this.resolveChannel({ phoneNumber, email: guest.email });
+
+        const { templateId, renderedTitle, renderedBody } =
+          await this.templateRenderService.renderFromKey({
+            templateKey: 'invitation.event.invite',
+            channel,
+            locale,
+            variables,
+          });
+
+        const notification = await this.create({
+          tenantId: 'omnixys',
+          recipientUsername: `${guest.firstName}.${guest.lastName}`,
+          recipientAddress: guest.email ?? phoneNumber ?? 'unknown',
+          channel: Channel.EMAIL,
+          priority: Priority.NORMAL,
+          templateId,
+          variables: variables as unknown as InputJsonValue,
+          metadata: {
+            flow: 'send-invitation',
+          },
+          sensitive: false,
+          expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+          createdBy: 'notification-service',
+        });
+
+        await this.dispatchNotification({
+          channel,
+          notificationId: notification.id,
+          to: guest.email ?? phoneNumber,
+          subject: renderedTitle ?? '',
+          body: renderedBody,
+          flow: 'send-invitation',
+        });
+
+        /**
+         * 6️⃣ Mark as sent
+         */
+        await this.markAsSent(notification.id, {
+          provider: this.resolveProvider(channel),
+        });
+
+        results.push(notification);
+      }
+
+      return error;
+      // return results;
+    });
+  }
+
   private resolveChannel({
     email,
     phoneNumber,
@@ -696,8 +792,12 @@ export class NotificationWriteService {
     email?: string;
     phoneNumber?: string;
   }): Channel {
-    if (email) return Channel.EMAIL;
-    if (phoneNumber) return Channel.WHATSAPP;
+    if (email) {
+      return Channel.EMAIL;
+    }
+    if (phoneNumber) {
+      return Channel.WHATSAPP;
+    }
 
     throw new Error('No valid communication channel provided (email or phoneNumber required)');
   }
@@ -713,8 +813,12 @@ export class NotificationWriteService {
     const { channel, notificationId, to, body, flow } = input;
     switch (channel) {
       case Channel.EMAIL:
-        if (!to) throw new Error('Missing email address');
-        if (!input.subject) throw new Error('Missing email subject');
+        if (!to) {
+          throw new Error('Missing email address');
+        }
+        if (!input.subject) {
+          throw new Error('Missing email subject');
+        }
 
         await this.mailService.send({
           to,
@@ -731,7 +835,9 @@ export class NotificationWriteService {
         return;
 
       case Channel.WHATSAPP:
-        if (!to) throw new Error('Missing phone number');
+        if (!to) {
+          throw new Error('Missing phone number');
+        }
 
         await this.whatsappService.send({
           to,
@@ -744,7 +850,9 @@ export class NotificationWriteService {
         });
         return;
 
-      default:
+      case Channel.IN_APP:
+      case Channel.PUSH:
+      case Channel.SMS:
         throw new Error(`Unsupported channel: ${channel}`);
     }
   }
@@ -755,7 +863,9 @@ export class NotificationWriteService {
         return 'resend';
       case Channel.WHATSAPP:
         return 'whatsapp-api';
-      default:
+      case Channel.IN_APP:
+      case Channel.PUSH:
+      case Channel.SMS:
         return 'unknown';
     }
   }

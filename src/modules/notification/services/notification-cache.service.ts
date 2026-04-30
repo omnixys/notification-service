@@ -100,45 +100,45 @@ export class NotificationCacheService {
         })),
       ];
 
-          /**
-     * AUTH → only identity relevant data
-     */
-    const authPayload: GuestAuthKey = {
-      actorId: input.actorId,
-      invitees: invitees.map((i) => ({
-        invitationId: i.invitationId,
-        email: i.email,
-        firstName: i.firstName,
-        lastName: i.lastName,
-      })),
-    };
+      /**
+       * AUTH → only identity relevant data
+       */
+      const authPayload: GuestAuthKey = {
+        actorId: input.actorId,
+        invitees: invitees.map((i) => ({
+          invitationId: i.invitationId,
+          email: i.email,
+          firstName: i.firstName,
+          lastName: i.lastName,
+        })),
+      };
 
-          /**
-     * USER → user creation data
-     */
-    const userPayload: GuestUserKey = {
-      actorId: input.actorId,
-      users: invitees.map((i) => ({
-        invitationId: i.invitationId,
-        firstName: i.firstName,
-        lastName: i.lastName,
-        email: i.email,
-        phoneNumbers: i.phoneNumbers,
-      })),
-    };
+      /**
+       * USER → user creation data
+       */
+      const userPayload: GuestUserKey = {
+        actorId: input.actorId,
+        users: invitees.map((i) => ({
+          invitationId: i.invitationId,
+          firstName: i.firstName,
+          lastName: i.lastName,
+          email: i.email,
+          phoneNumbers: i.phoneNumbers,
+        })),
+      };
 
-          /**
-     * EVENT → only mapping
-     */
-    const eventPayload: GuestEventKey = {
-      eventId: input.eventId,
-      actorId: input.actorId,
-      invitationIds: invitees.map((i) => i.invitationId),
-    };
+      /**
+       * EVENT → only mapping
+       */
+      const eventPayload: GuestEventKey = {
+        eventId: input.eventId,
+        actorId: input.actorId,
+        invitationIds: invitees.map((i) => i.invitationId),
+      };
 
-          /**
-     * SEAT → deterministic assignment
-     */
+      /**
+       * SEAT → deterministic assignment
+       */
       const seatPayload: GuestSeatKey = {
         eventId: input.eventId,
         actorId: input.actorId,
@@ -158,9 +158,9 @@ export class NotificationCacheService {
         ],
       };
 
-          /**
-     * Persist keys
-     */
+      /**
+       * Persist keys
+       */
       const [authKey, userKey, eventKey, seatKey] = await Promise.all([
         this.cache.set(ValkeyKey.guestVerificationAuth, JSON.stringify(authPayload), ttlSeconds),
         this.cache.set(ValkeyKey.guestVerificationUser, JSON.stringify(userPayload), ttlSeconds),

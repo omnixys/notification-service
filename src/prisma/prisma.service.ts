@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import 'dotenv/config';
 
 import { env } from '../config/env.js';
@@ -27,6 +27,8 @@ const { DATABASE_URL } = env;
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(PrismaService.name);
+
   constructor() {
     const adapter = new PrismaPg({
       connectionString: DATABASE_URL,
@@ -42,11 +44,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     setupPrismaSpans(this);
 
     await this.$connect();
-    console.log('📦 Prisma connected');
+    this.logger.log('Prisma connected');
   }
 
   async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
-    console.log('📦 Prisma disconnected');
+    this.logger.log('Prisma disconnected');
   }
 }

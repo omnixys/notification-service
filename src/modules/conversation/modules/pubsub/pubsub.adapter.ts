@@ -1,13 +1,18 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache';
 
+type PubSubHandler = (payload: unknown) => Promise<void> | void;
+type IteratorResultResolver = (
+  result: IteratorResult<unknown, undefined>,
+) => void;
+
 @Injectable()
 export class GraphQLPubSubAdapter implements OnModuleInit {
-  private handlers = new Map<string, Function[]>();
+  private handlers = new Map<string, PubSubHandler[]>();
 
   constructor(private readonly valkeyPubSub: ValkeyPubSubService) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     // subscribe to channel once
     await this.valkeyPubSub.subscribe('whatsapp.message', async (payload) => {
       const handlers = this.handlers.get('whatsapp.message') ?? [];
@@ -18,27 +23,27 @@ export class GraphQLPubSubAdapter implements OnModuleInit {
     });
   }
 
-  async publish(trigger: string, payload: any) {
+  async publish(trigger: string, payload: unknown): Promise<void> {
     await this.valkeyPubSub.publish(trigger, payload);
   }
 
-  asyncIterator(trigger: string) {
+  asyncIterator(trigger: string): AsyncIterableIterator<unknown> {
     return {
-      [Symbol.asyncIterator]: () => {
-        const queue: any[] = [];
-        let resolve: any;
+      [Symbol.asyncIterator]: (): AsyncIterableIterator<unknown> => {
+        const queue: unknown[] = [];
+        let resolve: IteratorResultResolver | undefined;
 
-        const push = (value: any) => {
+        const push = (value: unknown): void => {
           if (resolve) {
             resolve({ value, done: false });
-            resolve = null;
+            resolve = undefined;
           } else {
             queue.push(value);
           }
         };
 
-        const pull = () =>
-          new Promise((res) => {
+        const pull = (): Promise<IteratorResult<unknown, undefined>> =>
+          new Promise<IteratorResult<unknown, undefined>>((res) => {
             if (queue.length > 0) {
               res({ value: queue.shift(), done: false });
             } else {
@@ -52,11 +57,32 @@ export class GraphQLPubSubAdapter implements OnModuleInit {
 
         return {
           next: pull,
-          return: async () => ({ value: undefined, done: true }),
-          throw: async (error: any) => {
+          return: async (): Promise<IteratorResult<unknown, undefined>> => ({
+            value: undefined,
+            done: true,
+          }),
+          throw: async (
+            error?: unknown,
+          ): Promise<IteratorResult<unknown, undefined>> => {
             throw error;
           },
+          [Symbol.asyncIterator](): AsyncIterableIterator<unknown> {
+            return this;
+          },
         };
+      },
+      next: async (): Promise<IteratorResult<unknown, undefined>> => ({
+        value: undefined,
+        done: true,
+      }),
+      return: async (): Promise<IteratorResult<unknown, undefined>> => ({
+        value: undefined,
+        done: true,
+      }),
+      throw: async (
+        error?: unknown,
+      ): Promise<IteratorResult<unknown, undefined>> => {
+        throw error;
       },
     };
   }

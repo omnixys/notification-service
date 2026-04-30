@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { CreateNotificationInput } from '../models/inputs/create-notification.input.js';
+import { SendInvitationsInput } from '../models/inputs/send-invitations.input.js';
 import { NotificationMapper } from '../models/mappers/notification.mapper.js';
 import { NotificationPayload } from '../models/payloads/notification.payload.js';
 import { NotificationWriteService } from '../services/notification-write.service.js';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { ClientIp, Device, Location, RequestCookies } from '@omnixys/context';
 import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger } from '@omnixys/logger';
+import { CookieAuthGuard } from '@omnixys/security';
 import { OmnixysCookieRequest } from '@omnixys/shared';
 
 @Resolver()
@@ -124,6 +126,18 @@ export class NotificationMutationResolver {
       createUserInput,
       locale,
     });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(CookieAuthGuard)
+  async sendInvitations(
+    @Args('input') input: SendInvitationsInput,
+  ): Promise<boolean> {
+    this.logger.info('sendInvitations called: guests=%s', input.guests.length);
+
+    await this.notificationWriteService.sendBulkInvitations(input);
 
     return true;
   }

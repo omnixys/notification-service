@@ -1,7 +1,10 @@
-
+import {
+  SendWhatsappInput,
+  SendWhatsappResult,
+  WhatsAppProvider,
+} from './whatsapp.provider.interface.js';
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
-import { SendWhatsappInput, WhatsAppProvider } from './whatsapp.provider.interface.js';
 
 @Injectable()
 export class WhatsAppCloudProvider implements WhatsAppProvider {
@@ -15,7 +18,7 @@ export class WhatsAppCloudProvider implements WhatsAppProvider {
     return !!this.token;
   }
 
-  async send(input: SendWhatsappInput): Promise<void> {
+  async send(input: SendWhatsappInput): Promise<SendWhatsappResult> {
     if (!this.token) {
       throw new Error('WhatsApp Cloud API token missing');
     }
@@ -38,6 +41,7 @@ export class WhatsAppCloudProvider implements WhatsAppProvider {
       });
 
       this.logger.debug('Cloud WhatsApp sent to %s', input.to);
+      return {};
     } catch (error) {
       this.logger.error('Cloud WhatsApp send failed', error);
       throw error;

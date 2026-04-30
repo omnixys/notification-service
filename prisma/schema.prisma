@@ -226,6 +226,7 @@ model WhatsAppChat {
   chatId  String  @unique
   name    String?
   isGroup Boolean @default(false)
+  phone   String?
 
   assignedTo String? // userId (Keycloak)
   status     ChatStatus @default(OPEN)
