@@ -3,6 +3,88 @@
 All notable changes in this project will be documented in this file.
 
 
+## 1.0.0 (2026-05-01)
+
+### 1.0.0
+
+* **1.0.0:** Remove legacy workflows and update notifications ([](https://github.com/omnixys/notification-service/commit/7c706361b425b71e8e106f78371cd1f159ae34ff))
+
+### Ci
+
+* **Ci:** add ci jobs ([](https://github.com/omnixys/notification-service/commit/67f075ba41555bbfbfeb66aaa48a179f178727c1))
+* **Ci:** update release.yml ([](https://github.com/omnixys/notification-service/commit/35b2fe3067c2b16e7f4da84f4d09cd253634d239))
+
+### Dockerfile
+
+* **Dockerfile:** add private npm auth and update Dockerfile & deps ([](https://github.com/omnixys/notification-service/commit/7798b007d311633d3160115bee2ebf646bd8ab01))
+
+### Other
+
+* **Other:** add CookieAuthGuard ([](https://github.com/omnixys/notification-service/commit/cebd8d6fcc8107ec8c0d809a3424dda3bd09b086))
+* **Other:** add notification methods ([](https://github.com/omnixys/notification-service/commit/5c1c206c552fec1dca5730d4c89b3be1c5be9a4f))
+* **Other:** add Status ARCHIVED ([](https://github.com/omnixys/notification-service/commit/3b77aa3bb310c826a7d0a032f7b5f480524d0a21))
+* **Other:** Create deploy.yml ([](https://github.com/omnixys/notification-service/commit/94752c775804e565492c7126016b2b625587062c))
+* **Other:** Initial commit ([](https://github.com/omnixys/notification-service/commit/523a157a82e42686bb2614f537b4435ad897da81))
+* **Other:** lint fix ([](https://github.com/omnixys/notification-service/commit/0ffe12b01ce6fe59f5db3743ed27cf67fbf18c9f))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/9a54f2da092cce5567cb8d64a7d4ea22ea98e581))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/d0d5189cbe54c420d333ba9813b50cff540a78ce))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/00bdc8e33826a4efa4fc32d73e1283910d0bcb82))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/fc9abdabc3974d915af4207ac681dedea9892535))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/a8c209e372d2121a6b2a8a0e187cd425a7cc1ce1))
+* **Other:** Merge branch 'main' of https://github.com/omnixys/notification-service ([](https://github.com/omnixys/notification-service/commit/04ce9a2914b8b3a64d959e253e2ef146169c073b))
+* **Other:** Update deploy.yml ([](https://github.com/omnixys/notification-service/commit/3420393f5a0ac902a4deb113edffabad622178e6))
+* **Other:** Update docker-build.yaml ([](https://github.com/omnixys/notification-service/commit/2b0b8a56a49e4d7cb2e1f2f71cd61d54e8b05be8))
+* **Other:** Update Dockerfile ([](https://github.com/omnixys/notification-service/commit/5da5a3ec50b1de6be7e0a6f1ebf6abe7a71336fb))
+* **Other:** Update notification-mutation.resolver.ts ([](https://github.com/omnixys/notification-service/commit/ae97ffcde12bc4809cfeedbcb7e98e40e4f5863f))
+* **Other:** Update notification-write.service.ts ([](https://github.com/omnixys/notification-service/commit/42c6fa74e2c33dfe445d7ae8a69b2d111c887051))
+* **Other:** Update package.json ([](https://github.com/omnixys/notification-service/commit/0373f0b994be6c7d7375ca8edca5dee57ce26d81))
+
+### Package.json
+
+* **Package.json:** update pnpm lockfile ([](https://github.com/omnixys/notification-service/commit/53e2aee3107f3b0985016ca1fee4ab654f30d7b7))
+* **Package.json:** update pnpm lockfile ([](https://github.com/omnixys/notification-service/commit/a357c3bb40e1887b2fda8d716b2a5fee06460d06))
+* **Package.json:** update pnpm lockfile ([](https://github.com/omnixys/notification-service/commit/5bce90a73eccab65fbc31313d960e13979239444))
+* **Package.json:** update pnpm lockfile ([](https://github.com/omnixys/notification-service/commit/77980b2b3e060926f709e5b6a68c4127d0d6e9c5))
+* **Package.json:** Update workflow trigger and package description ([](https://github.com/omnixys/notification-service/commit/56947d2ea698831d9f8a17ac60bfe755c97f3e56))
+
+### Register
+
+* **Register:** add register flow ([](https://github.com/omnixys/notification-service/commit/e60465093aa3c13868c5e13473ae7ebb7ffd50c7))
+
+### Release
+
+* **Release:** v1.0.0 ([](https://github.com/omnixys/notification-service/commit/e1a5996b2b78a5ff9a870fa589aa3c6996a5daea))
+* **Release:** 1.0.0 [skip ci] ([](https://github.com/omnixys/notification-service/commit/8b1b8bd01eaa91a4d13546c932abce755e9650a2))
+* **Release:** 1.0.1 [skip ci] ([](https://github.com/omnixys/notification-service/commit/185ed215c8830ce324e17beb237b5f9cb249b14e))
+* **Release:** 2.0.0 [skip ci] ([](https://github.com/omnixys/notification-service/commit/a533b6cf35e3e05506534348d37b1f308bdca526))
+* **Release:** 3.0.0 [skip ci] ([](https://github.com/omnixys/notification-service/commit/ed6d8fd58523a8cc0cd5bc4602469f044ef5a820))
+* **Release:** 3.0.1 [skip ci] ([](https://github.com/omnixys/notification-service/commit/5a4490197b15533b50db68ee3a25f0e8f3aa6ddd))
+* **Release:** 3.0.2 [skip ci] ([](https://github.com/omnixys/notification-service/commit/8bc9e8380737d660b06454c854383aba4515a4fe))
+* **Release:** 3.0.3 [skip ci] ([](https://github.com/omnixys/notification-service/commit/f0a5dec33b54186d41637a4015ac46c9c5430c79))
+* **Release:** update ([](https://github.com/omnixys/notification-service/commit/83ca7547359d13d72ebf4e6c860ea6e076e96795))
+
+### Schema
+
+* **Schema:** new schema ([](https://github.com/omnixys/notification-service/commit/ef2f754547e374ca03637b0a07a3a269e3ff0d1d))
+
+### Service
+
+* **Service:** update service ([](https://github.com/omnixys/notification-service/commit/bd7bf168f507eabc52a876589266843d10d82a1d))
+* **Service:** major Service update ([](https://github.com/omnixys/notification-service/commit/1adfe7d5a9dc2cb642b0e8c967661c55d9bafa4f))
+* **Service:** major Service update ([](https://github.com/omnixys/notification-service/commit/f0b55fbe8bdf8c95262011a9af08996ad0db3260))
+
+### Template
+
+* **Template:** add new Templates ([](https://github.com/omnixys/notification-service/commit/599c04f8a63f1a7120c603db728b9f3ca730ce91))
+
+### Update
+
+* **Update:** update @omnixys/graphql ([](https://github.com/omnixys/notification-service/commit/eecceacd2ac59758153ec332d450eb18c4494dc9))
+
+### Whatsapp
+
+* **Whatsapp:** add whatsappweb support ([](https://github.com/omnixys/notification-service/commit/b589e677a8c82857f97be89c18cec7d13ab89f08))
+
 ## [3.0.3](https://github.com/omnixys/notification-service/compare/v3.0.2...v3.0.3) (2026-03-13)
 
 ### Other
