@@ -1,6 +1,6 @@
-import {
-  WhatsAppProvider,
+import type {
   SendWhatsappInput,
+  WhatsAppProvider,
 } from '../providers/whatsapp/whatsapp.provider.interface.js';
 import { WHATSAPP_PROVIDER } from '../providers/whatsapp/whatsapp.provider.token.js';
 import { Inject, Injectable } from '@nestjs/common';

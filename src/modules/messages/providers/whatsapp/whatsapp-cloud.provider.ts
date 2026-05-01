@@ -1,4 +1,4 @@
-import {
+import type {
   SendWhatsappInput,
   SendWhatsappResult,
   WhatsAppProvider,

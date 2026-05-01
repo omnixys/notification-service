@@ -6,7 +6,8 @@ import { RequestCookies } from '@omnixys/context';
 import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger, LoggingInterceptor } from '@omnixys/logger';
 import { CookieAuthGuard, RoleGuard, Roles } from '@omnixys/security';
-import { OmnixysCookieRequest, RealmRoleType } from '@omnixys/shared';
+import { RealmRoleType } from '@omnixys/shared';
+import type { OmnixysCookieRequest } from '@omnixys/shared';
 
 @Resolver()
 @UseInterceptors(LoggingInterceptor)

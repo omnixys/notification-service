@@ -1,15 +1,18 @@
 import { env } from '../../../../config/env.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
-import {
+import type {
   SendWhatsappInput,
   SendWhatsappResult,
   WhatsAppProvider,
 } from './whatsapp.provider.interface.js';
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { MessageAck } from 'whatsapp-web.js';
+import pkg from 'whatsapp-web.js';
 import type WhatsAppWeb from 'whatsapp-web.js';
 import type { Client, Message } from 'whatsapp-web.js';
+
+const { MessageAck } = pkg;
+type MessageAckType = (typeof MessageAck)[keyof typeof MessageAck];
 
 enum WhatsAppState {
   INITIALIZING = 'INITIALIZING',
@@ -134,7 +137,7 @@ export class WhatsAppWebProvider
       this.logger.debug('Chats loaded: %s', chats.length);
     });
 
-    client.on('message_ack', async (msg: Message, ack: MessageAck) => {
+    client.on('message_ack', async (msg: Message, ack: MessageAckType) => {
       const messageId = msg.id?._serialized;
 
       if (!messageId) {

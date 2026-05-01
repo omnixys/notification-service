@@ -1,6 +1,6 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
 import { PhoneNumberInput } from '@omnixys/graphql';
-import { Locale, PhoneNumberDTO } from '@omnixys/shared';
+import type { Locale, PhoneNumberDTO } from '@omnixys/shared';
 
 export interface BulkInvitationDTO {
   hostName?: string;

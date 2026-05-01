@@ -82,7 +82,16 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .extras/doc
 
 
+
+.wwebjs_auth
+.wwebjs_cache
+
+.extras/json
+.extras/data
+.extras/sql
 .npmrc
 .secrets
-.wwebjs_auth/**
-.wwebjs_cache/**
+__tests__
+log
+TODO.md
+node_profiles

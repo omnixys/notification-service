@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { SendMailDTO } from '../models/dto/send-mail.dto.js';
-import { MailProvider } from '../providers/mail/mail-provider.interface.js';
+import type { MailProvider } from '../providers/mail/mail-provider.interface.js';
 import { MAIL_PROVIDER } from '../providers/mail/mail-provider.token.js';
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { OmnixysLogger } from '@omnixys/logger';

@@ -9,7 +9,7 @@ import { ClientIp, Device, Location, RequestCookies } from '@omnixys/context';
 import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger } from '@omnixys/logger';
 import { CookieAuthGuard } from '@omnixys/security';
-import { OmnixysCookieRequest } from '@omnixys/shared';
+import type { OmnixysCookieRequest } from '@omnixys/shared';
 
 @Resolver()
 export class NotificationMutationResolver {

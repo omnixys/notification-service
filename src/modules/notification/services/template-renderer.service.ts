@@ -8,7 +8,7 @@ import { PasswordResetVariables } from '../models/variables/password-reset.varia
 import { SignUpVerificationVariables } from '../models/variables/sign-up-verification.variables.js';
 import { NotificationRenderer, VariableSchema } from '../utils/notification.renderer.js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Locale } from '@omnixys/shared';
+import type { Locale } from '@omnixys/shared';
 
 export interface RenderTemplateInput<TVariables = Record<string, unknown>> {
   templateKey: string;

@@ -21,14 +21,13 @@ import { CreateUserInput } from '@omnixys/graphql';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
 import { EncryptionService } from '@omnixys/security';
-import {
+import { createTmpUsername, getPrimaryPhoneNumber } from '@omnixys/shared';
+import type {
   CreatePendingUserDTO,
   GuestSignUpTokenPayload,
   Locale,
   SendAuthLinkDTO,
   SignUpTokenPayload,
-  createTmpUsername,
-  getPrimaryPhoneNumber,
 } from '@omnixys/shared';
 import { InputJsonValue } from '@prisma/client/runtime/client';
 
