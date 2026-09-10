@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.1](https://github.com/omnixys/notification-service/compare/v4.0.0...v4.0.1) (2026-09-10)
+
+### Deps
+
+* **Deps:** update graphql-ts ([](https://github.com/omnixys/notification-service/commit/9fdd1849d088b6ef44cda39bdb814fb5e9df4527))
+
 ## [4.0.0](https://github.com/omnixys/notification-service/compare/v3.6.0...v4.0.0) (2026-09-05)
 
 ### Deps
