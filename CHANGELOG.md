@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.2](https://github.com/omnixys/notification-service/compare/v4.0.1...v4.0.2) (2026-09-11)
+
+### Deps
+
+* **Deps:** update omnixys contracts-ts package ([](https://github.com/omnixys/notification-service/commit/8f04836f8d486ea40d294d54504e72d8b18b21c6))
+
 ## [4.0.1](https://github.com/omnixys/notification-service/compare/v4.0.0...v4.0.1) (2026-09-10)
 
 ### Deps
