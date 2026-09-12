@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.3](https://github.com/omnixys/notification-service/compare/v4.0.2...v4.0.3) (2026-09-12)
+
+### Notification
+
+* **Notification:** bump omnixys packages to 4.4.0 ([](https://github.com/omnixys/notification-service/commit/b9883b6b550cafa5da7b436325df7300d35a0994))
+
 ## [4.0.2](https://github.com/omnixys/notification-service/compare/v4.0.1...v4.0.2) (2026-09-11)
 
 ### Deps
