@@ -7,6 +7,7 @@ import {
 } from '../../../prisma/generated/client.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { DispatchService } from '../../messages/services/dispatch.service.js';
+import { GuestMagicLinkMetricsService } from '../metrics/guest-magic-link.metrics.service.js';
 import { AnalyticsOutboxService } from '../../support/modules/outbox/analytics-outbox.service.js';
 import {
   NotificationChannelUnavailableException,
@@ -15,7 +16,6 @@ import {
   NotificationNotFoundException,
   NotificationStateException,
 } from '../errors/notification.error.js';
-import { GuestMagicLinkMetricsService } from '../metrics/guest-magic-link.metrics.service.js';
 import { Channel } from '../models/enums/channel.enum.js';
 import { BulkInvitationDTO } from '../models/inputs/send-invitations.input.js';
 import { getVerificationChannelLabel } from '../models/mappers/verification-channel-label.mapper.js';
@@ -600,7 +600,7 @@ export class NotificationWriteService {
         expiresInMinutes: 15,
         supportEmail: 'support@omnixys.com',
         hostName: 'Caleb',
-        supportPhone: '1234567890',
+        supportPhone: '+4915226049639',
         verificationChannel: verificationChannelLabel,
       };
 
