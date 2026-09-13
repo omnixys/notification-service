@@ -143,10 +143,15 @@ export const env = {
   APP_BASE_URL: getEnv('APP_BASE_URL', 'http://localhost:3000', {
     required: true,
   }),
+  CHECKPOINT_APP_BASE_URL: getEnv(
+    'CHECKPOINT_APP_BASE_URL',
+    process.env.APP_BASE_URL ?? 'http://localhost:3001',
+  ),
 
   VERIFY_PATH: getEnv('VERIFY_PATH', '/verify'),
   VERIFY_GUEST_PATH: getEnv('VERIFY_GUEST_PATH', '/verify-guest'),
   MAGIC_PATH: getEnv('MAGIC_PATH', '/magic'),
+  CHECKPOINT_MAGIC_PATH: getEnv('CHECKPOINT_MAGIC_PATH', '/magic'),
   RESET_PATH: getEnv('RESET_PATH', '/reset'),
 
   FROM_NO_REPLY: getEnv('FROM_NO_REPLY', 'Omnixys <no-reply@omnixys.com>'),

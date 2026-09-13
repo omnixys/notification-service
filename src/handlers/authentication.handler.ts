@@ -15,10 +15,14 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import { GuestMagicLinkMetricsService } from '../modules/notification/metrics/guest-magic-link.metrics.service.js';
 import { NotificationWriteService } from '../modules/notification/services/notification-write.service.js';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 
-import { SendAuthLinkDTO } from '@omnixys/contracts-ts';
+import {
+  GuestMagicLinkNotificationDTO,
+  SendAuthLinkDTO,
+} from '@omnixys/contracts-ts';
 import {
   IKafkaEventContext,
   KafkaEvent,
@@ -50,6 +54,8 @@ export class AuthenticationHandler {
   constructor(
     loggerService: OmnixysLogger,
     private readonly service: NotificationWriteService,
+    @Optional()
+    private readonly magicLinkMetrics?: GuestMagicLinkMetricsService,
   ) {
     this.logger = loggerService.log(
       'service:notification',
@@ -100,6 +106,27 @@ export class AuthenticationHandler {
         this.logger.error('send_magic_link_failed: %o', {
           username: payload.username,
           error,
+        });
+      }
+    });
+  }
+
+  @KafkaEvent(KafkaTopics.notification.sendGuestMagicLink)
+  async handleSendGuestMagicLink(
+    payload: GuestMagicLinkNotificationDTO,
+    _context: IKafkaEventContext,
+  ): Promise<void> {
+    return TraceRunner.run('[HANDLER] Send Guest Magic Link', async () => {
+      try {
+        await this.service.sendGuestMagicLink(payload);
+      } catch {
+        this.magicLinkMetrics?.recordFailure(
+          payload.channel === 'WHATSAPP' ? 'WHATSAPP' : 'EMAIL',
+        );
+        this.logger.error('guest_magic_link_dispatch: %o', {
+          result: 'INTERNAL_FAILURE',
+          correlationId: payload.correlationId,
+          channel: payload.channel,
         });
       }
     });

@@ -15,6 +15,7 @@ import {
   NotificationNotFoundException,
   NotificationStateException,
 } from '../errors/notification.error.js';
+import { GuestMagicLinkMetricsService } from '../metrics/guest-magic-link.metrics.service.js';
 import { Channel } from '../models/enums/channel.enum.js';
 import { BulkInvitationDTO } from '../models/inputs/send-invitations.input.js';
 import { getVerificationChannelLabel } from '../models/mappers/verification-channel-label.mapper.js';
@@ -23,11 +24,12 @@ import { CreateGuestVariables } from '../models/variables/create-guest.variables
 import { formatRequestTime } from '../utils/date.util.js';
 import { NotificationCacheService } from './notification-cache.service.js';
 import { SendInvitationVariables, TemplateRenderService } from './template-renderer.service.js';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache-ts';
 import { createTmpUsername, getPrimaryPhoneNumber } from '@omnixys/contracts-ts';
 import type {
   CreatePendingUserDTO,
+  GuestMagicLinkNotificationDTO,
   GuestSignUpTokenPayload,
   Locale,
   SendAuthLinkDTO,
@@ -41,9 +43,11 @@ import { InputJsonValue } from '@prisma/client/runtime/client';
 
 const {
   APP_BASE_URL,
+  CHECKPOINT_APP_BASE_URL,
   VERIFY_PATH,
   VERIFY_GUEST_PATH,
   MAGIC_PATH,
+  CHECKPOINT_MAGIC_PATH,
   RESET_PATH,
   FROM_SUPPORT,
   FROM_NO_REPLY,
@@ -103,6 +107,7 @@ export class NotificationWriteService {
     private readonly valkeyPubSub: ValkeyPubSubService,
     loggerService: OmnixysLogger,
     private readonly analyticsOutbox: AnalyticsOutboxService,
+    @Optional() private readonly magicLinkMetrics?: GuestMagicLinkMetricsService,
   ) {
     this.logger = loggerService.log(this.constructor.name, 'service:notification');
   }
@@ -112,8 +117,7 @@ export class NotificationWriteService {
   // ─────────────────────────────────────────────
   async create(input: CreateNotificationDTO): Promise<Notification> {
     this.logger.debug(
-      'create notification: recipientUsername=%s channel=%s templateId=%s',
-      input.recipientUsername,
+      'create notification: channel=%s templateId=%s',
       input.channel,
       input.templateId ?? 'none',
     );
@@ -686,7 +690,7 @@ export class NotificationWriteService {
           variables: {
             username,
             actionUrl: magicLink,
-            expiresInMinutes: 15,
+            expiresInMinutes: 5,
             ip,
             device,
             location,
@@ -705,7 +709,7 @@ export class NotificationWriteService {
         variables: {
           username,
           actionUrl: magicLink,
-          expiresInMinutes: 15,
+          expiresInMinutes: 5,
           ip,
           device,
           location,
@@ -716,7 +720,7 @@ export class NotificationWriteService {
           flow: 'create-magic-link',
         },
         sensitive: false,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         createdBy: '2bd07be1-88b4-7a13-b797-b00e417c6102',
       });
 
@@ -749,6 +753,64 @@ export class NotificationWriteService {
       );
       throw error;
     }
+  }
+
+  async sendGuestMagicLink(input: GuestMagicLinkNotificationDTO): Promise<void> {
+    const channel = input.channel === 'WHATSAPP' ? Channel.WHATSAPP : Channel.EMAIL;
+    const magicUrl = new URL(CHECKPOINT_MAGIC_PATH, CHECKPOINT_APP_BASE_URL);
+    magicUrl.searchParams.set('token', input.token);
+    const magicLink = magicUrl.toString();
+    const variables = {
+      username: input.username,
+      actionUrl: magicLink,
+      expiresInMinutes: 5,
+      ip: input.ip ?? 'Unknown IP address',
+      device: input.device,
+      location: input.location,
+      requestTime: formatRequestTime(input.locale),
+      supportEmail: FROM_SUPPORT,
+    };
+    const { templateId, renderedTitle, renderedBody } =
+      await this.templateRenderService.renderFromKey({
+        templateKey: 'auth.guest-magic-link.request',
+        channel,
+        locale: input.locale,
+        variables,
+      });
+
+    const notification = await this.create({
+      tenantId: input.tenantId,
+      recipientUsername: input.username,
+      recipientAddress: input.recipient,
+      channel,
+      priority: Priority.NORMAL,
+      templateId,
+      variables,
+      metadata: {
+        flow: 'guest-magic-link',
+        correlationId: input.correlationId,
+        traceId: input.traceId,
+      },
+      sensitive: true,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      createdBy: '2bd07be1-88b4-7a13-b797-b00e417c6102',
+    });
+    await this.dispatchNotification({
+      channel,
+      notificationId: notification.id,
+      to: input.recipient,
+      subject: renderedTitle ?? '',
+      body: renderedBody,
+      flow: 'guest-magic-link',
+      tenantId: input.tenantId,
+    });
+    await this.markAsSent(notification.id, { provider: this.resolveProvider(channel) });
+    this.magicLinkMetrics?.recordDispatch(channel);
+    this.logger.info('guest_magic_link_dispatch: %o', {
+      result: 'DISPATCHED',
+      correlationId: input.correlationId,
+      channel: input.channel,
+    });
   }
 
   async sendRequestReset({

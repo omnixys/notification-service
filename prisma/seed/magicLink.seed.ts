@@ -1,26 +1,29 @@
-import { Channel, ContentFormat, PrismaClient } from "../../src/prisma/generated/client"
-import { ensureTemplate, ensureVersion } from "./helpers"
+import {
+  Channel,
+  ContentFormat,
+  PrismaClient,
+} from '../../src/prisma/generated/client';
+import { ensureTemplate, ensureVersion } from './helpers';
 
 export async function seedMagicLinkTemplates(
   prisma: PrismaClient,
   tenantId: string,
 ) {
-
   const magicLinkTemplate = await ensureTemplate(
-      prisma,
-      tenantId,
- "auth.magic-link.request",
+    prisma,
+    tenantId,
+    'auth.magic-link.request',
     Channel.EMAIL,
-      ['auth', 'security', 'magic-link'],
-    );
-  
+    ['auth', 'security', 'magic-link'],
+  );
+
   await ensureVersion(
-      prisma,
-      magicLinkTemplate.id,
-      'de-DE',
-      1,
-      'Dein Omnixys Login-Link',
-      `
+    prisma,
+    magicLinkTemplate.id,
+    'de-DE',
+    1,
+    'Dein Omnixys Login-Link',
+    `
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -90,26 +93,26 @@ Support: <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>
 </body>
 </html>
       `,
-      ContentFormat.HTML,
-      {
-  username: "string",
-  actionUrl: "string",
-  ip: "string",
-  requestTime: "string",
-  device: "string",
-  location: "string",
-  expiresInMinutes: "number",
-  supportEmail: "string",
-},
+    ContentFormat.HTML,
+    {
+      username: 'string',
+      actionUrl: 'string',
+      ip: 'string',
+      requestTime: 'string',
+      device: 'string',
+      location: 'string',
+      expiresInMinutes: 'number',
+      supportEmail: 'string',
+    },
   );
-  
-    await ensureVersion(
-      prisma,
-      magicLinkTemplate.id,
-      'en-US',
-      1,
-      'Your Omnixys sign-in link',
-      `
+
+  await ensureVersion(
+    prisma,
+    magicLinkTemplate.id,
+    'en-US',
+    1,
+    'Your Omnixys sign-in link',
+    `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,18 +183,99 @@ Need help? Contact us at
 </body>
 </html>
       `,
-      ContentFormat.HTML,
-      {
-  username: "string",
-  actionUrl: "string",
-  ip: "string",
-  requestTime: "string",
-  device: "string",
-  location: "string",
-  expiresInMinutes: "number",
-  supportEmail: "string",
-},
-    );
-  
-  console.log("✅ Magic link templates seeded (de-DE & en-US)");
+    ContentFormat.HTML,
+    {
+      username: 'string',
+      actionUrl: 'string',
+      ip: 'string',
+      requestTime: 'string',
+      device: 'string',
+      location: 'string',
+      expiresInMinutes: 'number',
+      supportEmail: 'string',
+    },
+  );
+
+  const variables = {
+    username: 'string',
+    actionUrl: 'string',
+    ip: 'string',
+    requestTime: 'string',
+    device: 'string',
+    location: 'string',
+    expiresInMinutes: 'number',
+    supportEmail: 'string',
+  };
+
+  const guestEmailTemplate = await ensureTemplate(
+    prisma,
+    tenantId,
+    'auth.guest-magic-link.request',
+    Channel.EMAIL,
+    ['auth', 'security', 'guest', 'magic-link'],
+  );
+
+  await ensureVersion(
+    prisma,
+    guestEmailTemplate.id,
+    'de-DE',
+    1,
+    'Dein Checkpoint-Login-Link',
+    `<h2>Checkpoint-Gastzugang</h2>
+<p>Hallo {{username}},</p>
+<p>über diesen Link kannst du dich bei Checkpoint anmelden:</p>
+<p><a href="{{actionUrl}}" rel="noopener noreferrer">Bei Checkpoint anmelden</a></p>
+<p>Der Link ist {{expiresInMinutes}} Minuten gültig und kann nur einmal verwendet werden.</p>
+<p>Falls du ihn nicht angefordert hast, ignoriere diese Nachricht.</p>`,
+    ContentFormat.HTML,
+    variables,
+  );
+  await ensureVersion(
+    prisma,
+    guestEmailTemplate.id,
+    'en-US',
+    1,
+    'Your Checkpoint sign-in link',
+    `<h2>Checkpoint guest access</h2>
+<p>Hello {{username}},</p>
+<p>Use this link to sign in to Checkpoint:</p>
+<p><a href="{{actionUrl}}" rel="noopener noreferrer">Sign in to Checkpoint</a></p>
+<p>The link is valid for {{expiresInMinutes}} minutes and can be used once.</p>
+<p>If you did not request it, ignore this message.</p>`,
+    ContentFormat.HTML,
+    variables,
+  );
+
+  const whatsappTemplate = await ensureTemplate(
+    prisma,
+    tenantId,
+    'auth.guest-magic-link.request',
+    Channel.WHATSAPP,
+    ['auth', 'security', 'guest', 'magic-link'],
+  );
+
+  await ensureVersion(
+    prisma,
+    whatsappTemplate.id,
+    'de-DE',
+    1,
+    null,
+    'Hallo {{username}}, hier ist dein Checkpoint-Login-Link: {{actionUrl}}. Er ist {{expiresInMinutes}} Minuten gültig und einmal verwendbar. Falls du ihn nicht angefordert hast, ignoriere diese Nachricht.',
+    ContentFormat.TEXT,
+    variables,
+  );
+  await ensureVersion(
+    prisma,
+    whatsappTemplate.id,
+    'en-US',
+    1,
+    null,
+    'Hello {{username}}, here is your Checkpoint sign-in link: {{actionUrl}}. It is valid for {{expiresInMinutes}} minutes and can be used once. If you did not request it, ignore this message.',
+    ContentFormat.TEXT,
+    variables,
+  );
+
+  console.log(
+    '✅ Magic link templates seeded (email & WhatsApp, de-DE & en-US)',
+  );
 }

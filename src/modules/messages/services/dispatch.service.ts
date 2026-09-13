@@ -38,9 +38,7 @@ export class DispatchService {
   }
 
   async dispatch(input: DispatchInput): Promise<DispatchResult> {
-    this.logger.debug(
-      `Dispatching ${input.channel} message to ${input.recipientAddress}: ${input.id}`,
-    );
+    this.logger.debug(`Dispatching ${input.channel} message: ${input.id}`);
 
     const gatewayInput: GatewaySendInput = {
       id: input.id,

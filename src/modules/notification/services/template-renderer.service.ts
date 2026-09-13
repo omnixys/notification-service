@@ -38,6 +38,7 @@ export interface SendInvitationVariables {
 export interface TemplateVariablesMap {
   'auth.password-reset.request': PasswordResetVariables;
   'auth.magic-link.request': MagicLinkVariables;
+  'auth.guest-magic-link.request': MagicLinkVariables;
   'auth.sign-up-verification.request': SignUpVerificationVariables;
   'guest.account.created': CreateGuestVariables;
   'account.created': AccountCreatedVariables;
