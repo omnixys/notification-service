@@ -260,7 +260,15 @@ Need help? Contact us at
     'de-DE',
     1,
     null,
-    'Hallo {{username}}, hier ist dein Checkpoint-Login-Link: {{actionUrl}}. Er ist {{expiresInMinutes}} Minuten gültig und einmal verwendbar. Falls du ihn nicht angefordert hast, ignoriere diese Nachricht.',
+    `Hallo {{username}} 👋
+
+du hast einen sicheren Anmeldelink für Checkpoint angefordert.
+
+👉 {{actionUrl}}
+
+Dieser Link kann nur einmal verwendet werden und ist noch {{expiresInMinutes}} Minuten gültig.
+
+Falls du diese Anmeldung nicht angefordert hast, kannst du diese Nachricht ignorieren.`,
     ContentFormat.TEXT,
     variables,
   );
@@ -270,7 +278,15 @@ Need help? Contact us at
     'en-US',
     1,
     null,
-    'Hello {{username}}, here is your Checkpoint sign-in link: {{actionUrl}}. It is valid for {{expiresInMinutes}} minutes and can be used once. If you did not request it, ignore this message.',
+    `Hello {{username}} 👋
+
+A secure sign-in link for Checkpoint was requested.
+
+👉 {{actionUrl}}
+
+This link can only be used once and expires in {{expiresInMinutes}} minutes.
+
+If you did not request this sign-in link, you can safely ignore this message.`,
     ContentFormat.TEXT,
     variables,
   );

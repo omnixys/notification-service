@@ -7,7 +7,6 @@ import {
 } from '../../../prisma/generated/client.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { DispatchService } from '../../messages/services/dispatch.service.js';
-import { GuestMagicLinkMetricsService } from '../metrics/guest-magic-link.metrics.service.js';
 import { AnalyticsOutboxService } from '../../support/modules/outbox/analytics-outbox.service.js';
 import {
   NotificationChannelUnavailableException,
@@ -16,6 +15,7 @@ import {
   NotificationNotFoundException,
   NotificationStateException,
 } from '../errors/notification.error.js';
+import { GuestMagicLinkMetricsService } from '../metrics/guest-magic-link.metrics.service.js';
 import { Channel } from '../models/enums/channel.enum.js';
 import { BulkInvitationDTO } from '../models/inputs/send-invitations.input.js';
 import { getVerificationChannelLabel } from '../models/mappers/verification-channel-label.mapper.js';
@@ -579,7 +579,11 @@ export class NotificationWriteService {
 
       const verificationId = this.encryptService.encrypt(JSON.stringify(payload), true);
 
-      const verifyUrl = `${APP_BASE_URL}${VERIFY_GUEST_PATH}?token=${verificationId}`;
+      const verifyUrl = new URL(`${APP_BASE_URL}${VERIFY_GUEST_PATH}`);
+      verifyUrl.searchParams.set('token', verificationId);
+      verifyUrl.searchParams.set('eventId', input.eventId);
+      const requestConfirmationUrl = new URL('/request-guest-confirmation', APP_BASE_URL);
+      requestConfirmationUrl.searchParams.set('eventId', input.eventId);
       this.logger.debug('confirmGuest verification link created: eventName=%s', eventName);
 
       const phoneNumber = getPrimaryPhoneNumber(input.phoneNumbers);
@@ -595,7 +599,9 @@ export class NotificationWriteService {
         firstName: input.firstName,
         eventName,
         lastName: input.lastName,
-        actionUrl: verifyUrl,
+        actionUrl: verifyUrl.toString(),
+        requestConfirmationUrl: requestConfirmationUrl.toString(),
+        eventId: input.eventId,
         seat,
         expiresInMinutes: 15,
         supportEmail: 'support@omnixys.com',

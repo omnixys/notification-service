@@ -4,6 +4,8 @@ export interface CreateGuestVariables {
   eventName: string;
   seat?: string;
   actionUrl: string;
+  requestConfirmationUrl: string;
+  eventId: string;
   expiresInMinutes: number;
   hostName?: string;
   supportEmail: string;

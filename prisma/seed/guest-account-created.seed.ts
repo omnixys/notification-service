@@ -73,6 +73,10 @@ Zugang bestätigen
 Dieser Link ist <strong>{{expiresInMinutes}} Minuten</strong> gültig und kann nur einmal verwendet werden.
 </p>
 
+<p style="font-size:13px;color:#666;">
+Link abgelaufen? <a href="{{requestConfirmationUrl}}">Fordere einen neuen Bestätigungslink an</a>.
+</p>
+
 <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
 
 <p style="font-size:13px;color:#666;">
@@ -113,6 +117,8 @@ Wir freuen uns auf dich!<br/>
       eventName: 'string',
       seat: 'string | null',
       actionUrl: 'string',
+      requestConfirmationUrl: 'string',
+      eventId: 'string',
       expiresInMinutes: 'number',
       verificationChannel: 'string',
       supportEmail: 'string',
@@ -172,6 +178,10 @@ Confirm access
 This link is valid for <strong>{{expiresInMinutes}} minutes</strong> and can only be used once.
 </p>
 
+<p style="font-size:13px;color:#666;">
+Has your link expired? <a href="{{requestConfirmationUrl}}">Request a new confirmation link</a>.
+</p>
+
 <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
 
 <p style="font-size:13px;color:#666;">
@@ -212,6 +222,8 @@ We look forward to seeing you!<br/>
       eventName: 'string',
       seat: 'string | null',
       actionUrl: 'string',
+      requestConfirmationUrl: 'string',
+      eventId: 'string',
       expiresInMinutes: 'number',
       verificationChannel: 'string',
       supportEmail: 'string',
@@ -253,6 +265,9 @@ Bitte bestätige deine {{verificationChannel}}, um deinen Zugang zu aktivieren:
 
 ⏳ Gültig für {{expiresInMinutes}} Minuten.
 
+Link abgelaufen? Fordere hier einen neuen Bestätigungslink an:
+👉 {{requestConfirmationUrl}}
+
 Danach wird dein Ticket automatisch erstellt 🎟️
 
 Fragen?
@@ -265,6 +280,8 @@ Fragen?
       eventName: 'string',
       seat: 'string | null',
       actionUrl: 'string',
+      requestConfirmationUrl: 'string',
+      eventId: 'string',
       expiresInMinutes: 'number',
       verificationChannel: 'string',
       supportEmail: 'string',
@@ -292,6 +309,9 @@ Please verify your {{verificationChannel}} to activate your access:
 
 ⏳ Valid for {{expiresInMinutes}} minutes.
 
+Has your link expired? Request a new confirmation link here:
+👉 {{requestConfirmationUrl}}
+
 Your ticket will be created automatically afterwards 🎟️
 
 Questions?
@@ -304,6 +324,8 @@ Questions?
       eventName: 'string',
       seat: 'string | null',
       actionUrl: 'string',
+      requestConfirmationUrl: 'string',
+      eventId: 'string',
       expiresInMinutes: 'number',
       verificationChannel: 'string',
       supportEmail: 'string',
