@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.0](https://github.com/omnixys/notification-service/compare/v4.0.4...v4.1.0) (2026-09-14)
+
+### Notification
+
+* **Notification:** add guest confirmation recovery links ([](https://github.com/omnixys/notification-service/commit/6a61756f18eb6060db58063b015fecb5b7ad5467))
+
+### Other
+
+* **Other:** featdeps): update omnixys packages ([](https://github.com/omnixys/notification-service/commit/0f96a897072b535c06631f577bef742dfa5fa155))
+
 ## [4.0.4](https://github.com/omnixys/notification-service/compare/v4.0.3...v4.0.4) (2026-09-13)
 
 ### Deps
