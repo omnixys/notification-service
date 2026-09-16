@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.1](https://github.com/omnixys/notification-service/compare/v4.1.0...v4.1.1) (2026-09-16)
+
+### Deps
+
+* **Deps:** update omnixys logger-ts package ([](https://github.com/omnixys/notification-service/commit/28f4ec30e65bd55441724d75f36301b78a128331))
+
 ## [4.1.0](https://github.com/omnixys/notification-service/compare/v4.0.4...v4.1.0) (2026-09-14)
 
 ### Notification
