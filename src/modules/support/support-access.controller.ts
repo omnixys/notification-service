@@ -13,6 +13,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { Public } from '@omnixys/security-ts';
+import { isUUID } from 'class-validator';
 import { timingSafeEqual } from 'node:crypto';
 
 const { INTERNAL_GATEWAY_TOKEN } = env;
@@ -68,17 +69,28 @@ export class SupportInboundController {
     @Body()
     body: {
       externalId: string;
+      eventId: string;
       from: string;
+      senderName?: string;
       body?: string;
       mediaUrl?: string;
       mimeType?: string;
     },
   ): Promise<{ conversationId: string; messageId: string; duplicate: boolean }> {
     assertInternalToken(token);
-    if (!body.externalId || !body.from || (!body.body?.trim() && !body.mediaUrl)) {
+    if (
+      !body.externalId ||
+      !isUUID(body.eventId) ||
+      !body.from ||
+      (!body.body?.trim() && !body.mediaUrl)
+    ) {
       throw new BadRequestException({ code: 'SUPPORT_INBOUND_INVALID' });
     }
-    const existing = await this.messages.findInboundMessage(body.externalId, body.from);
+    const existing = await this.messages.findInboundMessage(
+      body.externalId,
+      body.from,
+      body.eventId,
+    );
     if (existing) {
       return {
         conversationId: existing.conversationId,

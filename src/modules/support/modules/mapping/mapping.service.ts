@@ -119,10 +119,11 @@ export class MappingService {
   async resolveUniqueInboundMapping(
     channel: ConversationChannel,
     externalId: string,
+    eventId?: string,
   ): Promise<MappingResult> {
     const canonicalExternalId = normalizeSupportExternalId(externalId);
     const mappings = await this.prisma.conversationMapping.findMany({
-      where: { channel, externalId: canonicalExternalId },
+      where: { channel, externalId: canonicalExternalId, ...(eventId ? { eventId } : {}) },
       include: { conversation: true },
     });
     const mapped = mappings.filter(
@@ -147,6 +148,7 @@ export class MappingService {
     const candidates = await this.prisma.supportConversation.findMany({
       where: {
         channel,
+        ...(eventId ? { eventId } : {}),
         deletedAt: null,
         status: { not: 'CLOSED' },
         guestContact: { not: null },

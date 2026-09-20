@@ -7,7 +7,7 @@ import {
 } from '../../../../modules/notification/errors/notification.error.js';
 import type { SupportConversation, SupportMessage } from '../../../../prisma/generated/client.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
-import { MappingService } from '../mapping/mapping.service.js';
+import { MappingService, normalizeSupportExternalId } from '../mapping/mapping.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache-ts';
 import { EventPermissionKey } from '@omnixys/contracts-ts';
@@ -354,64 +354,124 @@ export class MessageService {
 
   async receiveInboundMessage(data: {
     externalId: string;
+    eventId: string;
     from: string;
+    senderName?: string;
     body?: string;
     mediaUrl?: string;
     mimeType?: string;
   }): Promise<SupportMessage | null> {
-    const mapping = await this.mappings.resolveUniqueInboundMapping('WHATSAPP', data.from);
-    if (!mapping.conversationId) {
-      return null;
-    }
+    const canonicalFrom = normalizeSupportExternalId(data.from);
+    const mapping = await this.mappings.resolveUniqueInboundMapping(
+      'WHATSAPP',
+      canonicalFrom,
+      data.eventId,
+    );
 
-    const existing = await this.prisma.supportMessage.findFirst({
-      where: {
-        conversationId: mapping.conversationId,
-        externalId: data.externalId,
-      },
-    });
-    if (existing) {
-      return existing;
-    }
+    let message: SupportMessage;
+    let conversation: SupportConversation;
+    let unreadCount: number;
 
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id: mapping.conversationId },
-    });
-    if (!conversation || conversation.status === 'CLOSED' || conversation.deletedAt) {
-      return null;
-    }
-
-    const [message, updatedConversation] = await this.prisma.$transaction([
-      this.prisma.supportMessage.create({
-        data: {
-          conversationId: conversation.id,
-          direction: 'INBOUND',
-          channel: 'WHATSAPP',
-          fromGuest: true,
-          body: data.body,
-          mediaUrl: data.mediaUrl,
-          mimeType: data.mimeType,
-          status: 'DELIVERED',
+    if (mapping.conversationId) {
+      const existing = await this.prisma.supportMessage.findFirst({
+        where: {
+          conversationId: mapping.conversationId,
           externalId: data.externalId,
         },
-      }),
-      this.prisma.supportConversation.update({
-        where: { id: conversation.id },
-        data: {
-          lastMessageAt: new Date(),
-          lastMessagePreview: (data.body ?? '(media)').slice(0, 100),
-          unreadCount: { increment: 1 },
-        },
-      }),
-    ]);
+      });
+      if (existing) {
+        return existing;
+      }
+
+      const mappedConversation = await this.prisma.supportConversation.findUnique({
+        where: { id: mapping.conversationId },
+      });
+      if (
+        mappedConversation?.eventId !== data.eventId ||
+        mappedConversation?.status === 'CLOSED' ||
+        mappedConversation?.deletedAt
+      ) {
+        return null;
+      }
+
+      const [createdMessage, updatedConversation] = await this.prisma.$transaction([
+        this.prisma.supportMessage.create({
+          data: {
+            conversationId: mappedConversation.id,
+            direction: 'INBOUND',
+            channel: 'WHATSAPP',
+            fromGuest: true,
+            body: data.body,
+            mediaUrl: data.mediaUrl,
+            mimeType: data.mimeType,
+            status: 'DELIVERED',
+            externalId: data.externalId,
+          },
+        }),
+        this.prisma.supportConversation.update({
+          where: { id: mappedConversation.id },
+          data: {
+            lastMessageAt: new Date(),
+            lastMessagePreview: (data.body ?? '(media)').slice(0, 100),
+            unreadCount: { increment: 1 },
+          },
+        }),
+      ]);
+      message = createdMessage;
+      conversation = mappedConversation;
+      unreadCount = updatedConversation.unreadCount;
+    } else {
+      const senderName = data.senderName?.trim();
+      const created = await this.prisma.$transaction(async (tx) => {
+        const createdConversation = await tx.supportConversation.create({
+          data: {
+            eventId: data.eventId,
+            guestName: senderName?.length ? senderName : canonicalFrom,
+            guestContact: canonicalFrom,
+            channel: 'WHATSAPP',
+            priority: 'NORMAL',
+            status: 'OPEN',
+            unreadCount: 1,
+            lastMessageAt: new Date(),
+            lastMessagePreview: (data.body ?? '(media)').slice(0, 100),
+          },
+        });
+        await tx.conversationMapping.create({
+          data: {
+            channel: 'WHATSAPP',
+            externalId: canonicalFrom,
+            eventId: data.eventId,
+            conversationId: createdConversation.id,
+            mappingType: 'AUTO',
+          },
+        });
+        const createdMessage = await tx.supportMessage.create({
+          data: {
+            conversationId: createdConversation.id,
+            direction: 'INBOUND',
+            channel: 'WHATSAPP',
+            fromGuest: true,
+            body: data.body,
+            mediaUrl: data.mediaUrl,
+            mimeType: data.mimeType,
+            status: 'DELIVERED',
+            externalId: data.externalId,
+          },
+        });
+        return { conversation: createdConversation, message: createdMessage };
+      });
+      message = created.message;
+      conversation = created.conversation;
+      unreadCount = created.conversation.unreadCount;
+    }
 
     try {
       await this.valkeyPubSub.publish(`support.event.conversations.${conversation.eventId}`, {
         eventId: conversation.eventId,
         conversationId: conversation.id,
         kind: 'updated',
-        unreadCount: updatedConversation.unreadCount,
-        guestUnreadCount: updatedConversation.guestUnreadCount,
+        unreadCount,
+        guestUnreadCount: conversation.guestUnreadCount,
       });
     } catch (error) {
       this.logger.warn('WhatsApp conversation realtime publish failed: %o', {
@@ -447,8 +507,12 @@ export class MessageService {
     return message;
   }
 
-  async findInboundMessage(externalId: string, from: string): Promise<SupportMessage | null> {
-    const mapping = await this.mappings.resolveUniqueInboundMapping('WHATSAPP', from);
+  async findInboundMessage(
+    externalId: string,
+    from: string,
+    eventId?: string,
+  ): Promise<SupportMessage | null> {
+    const mapping = await this.mappings.resolveUniqueInboundMapping('WHATSAPP', from, eventId);
     if (!mapping.conversationId) {
       return null;
     }
