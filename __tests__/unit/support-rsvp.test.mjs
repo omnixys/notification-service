@@ -311,13 +311,24 @@ test('SupportRsvpService.markAsRead – delegates to conversation service by inv
 // =========================================================================
 
 async function createConversationService(store, valkey) {
-  const { ConversationService } = await import(
-    '../../dist/modules/support/modules/conversation/conversation.service.js'
-  );
+  const [{ ConversationService }, { InvitationSupportValidationException }] = await Promise.all([
+    import('../../dist/modules/support/modules/conversation/conversation.service.js'),
+    import('../../dist/modules/support/rsvp/invitation-support-client.service.js'),
+  ]);
   const prisma = makeFakePrisma(store);
-  const svc = new ConversationService(prisma, valkey, {
-    getPermissionsForUser: async () => [],
-  });
+  const svc = new ConversationService(
+    prisma,
+    valkey,
+    {
+      getPermissionsForUser: async () => [],
+    },
+    undefined,
+    {
+      resolveByUser: async () => {
+        throw new InvitationSupportValidationException('NO_MATCH', 'no invitation for user');
+      },
+    },
+  );
   return svc;
 }
 

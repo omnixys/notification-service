@@ -4,6 +4,10 @@ import {
 } from '../../../../modules/notification/errors/notification.error.js';
 import type { Prisma, SupportConversation } from '../../../../prisma/generated/client.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import {
+  InvitationSupportClientService,
+  InvitationSupportValidationException,
+} from '../../rsvp/invitation-support-client.service.js';
 import { MappingService, normalizeSupportExternalId } from '../mapping/mapping.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache-ts';
@@ -20,6 +24,7 @@ export class ConversationService {
     private readonly valkeyPubSub: ValkeyPubSubService,
     private readonly permissionResolver: EventPermissionResolver,
     private readonly mappings: MappingService,
+    private readonly invitationClient: InvitationSupportClientService,
   ) {}
 
   async findById(id: string, user: CurrentUserData): Promise<SupportConversation> {
@@ -89,7 +94,7 @@ export class ConversationService {
       select: { id: true },
     });
     if (!eventAccess) {
-      throw new ConversationAccessDeniedException(eventId, 'event-membership-required');
+      await this.#assertGuestSupportAccess(eventId, user.id);
     }
 
     const guestName =
@@ -463,6 +468,28 @@ export class ConversationService {
       await this.valkeyPubSub.publish(`support.conversation.updated.${conversationId}`, payload);
     } catch {
       // Valkey publish failure is non-critical
+    }
+  }
+
+  /**
+   * Synchronous capability check for authenticated guests when the
+   * asynchronously-populated event-access projection is not yet available.
+   * The invitation service is the source of truth for guest support access.
+   * A resolved rejection fails closed with the public access-denied error;
+   * unexpected failures still propagate so outages stay observable.
+   */
+  async #assertGuestSupportAccess(eventId: string, userId: string): Promise<void> {
+    try {
+      await this.invitationClient.resolveByUser(eventId, userId);
+    } catch (error) {
+      if (!(error instanceof InvitationSupportValidationException)) {
+        throw error;
+      }
+      this.#logger.warn(
+        { eventId, userId, reason: error.code },
+        'support_conversation_sync_access_denied',
+      );
+      throw new ConversationAccessDeniedException(eventId, 'event-membership-required');
     }
   }
 

@@ -39,10 +39,27 @@ export class InvitationSupportClientService {
   }
 
   async resolve(invitationId: string): Promise<InvitationSupportContext> {
-    const url = `${this.baseUrl}/internal/rsvp-support/context`;
+    return this.request('/internal/rsvp-support/context', { invitationId });
+  }
+
+  /**
+   * Resolves whether an authenticated guest user currently holds a valid
+   * support invitation for the given event. Used as a synchronous fallback
+   * when the asynchronously-populated event-access projection is not yet
+   * available (e.g. immediately after access is granted).
+   */
+  async resolveByUser(eventId: string, userId: string): Promise<InvitationSupportContext> {
+    return this.request('/internal/rsvp-support/access', { eventId, userId });
+  }
+
+  private async request(
+    path: string,
+    params: Record<string, string>,
+  ): Promise<InvitationSupportContext> {
+    const url = `${this.baseUrl}${path}`;
     try {
       const response = await axios.get<InvitationSupportContext>(url, {
-        params: { invitationId },
+        params,
         timeout: 10_000,
         headers: {
           'x-internal-token': INTERNAL_GATEWAY_TOKEN,
@@ -54,8 +71,8 @@ export class InvitationSupportClientService {
         const payload = response.data as { code?: string; message?: string } | undefined;
         const code = payload?.code ?? `HTTP_${response.status}`;
         this.logger.warn(
-          'Invitation support context rejected: invitationId=%s status=%s code=%s',
-          invitationId,
+          'Invitation support access rejected: params=%j status=%s code=%s',
+          params,
           response.status,
           code,
         );
