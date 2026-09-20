@@ -538,7 +538,7 @@ export class ConversationService {
     userId: string,
     tenantId?: string,
   ): Promise<boolean> {
-    if (!tenantId || this.tenantRoutes.requireEventTenant(eventId) !== tenantId) {
+    if (!this.tenantRoutes.matchesEventTenant(eventId, tenantId)) {
       return false;
     }
     const permissions = await this.permissionResolver.getPermissionsForUser(userId, eventId);

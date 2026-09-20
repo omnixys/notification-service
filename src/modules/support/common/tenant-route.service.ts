@@ -5,6 +5,10 @@ import { ContextAccessor } from '@omnixys/context-ts';
 
 @Injectable()
 export class TenantRouteService {
+  matchesEventTenant(eventId: string, tenantId: string | undefined): boolean {
+    return Boolean(tenantId) && env.EVENT_TENANT_MAP[eventId] === tenantId;
+  }
+
   requireEventTenant(eventId: string): string {
     const configuredTenantId = env.EVENT_TENANT_MAP[eventId];
     if (!configuredTenantId) {
