@@ -64,6 +64,7 @@ export const ModelName = {
   InternalMessage: 'InternalMessage',
   InternalParticipant: 'InternalParticipant',
   EventAccessProjection: 'EventAccessProjection',
+  UserContactProjection: 'UserContactProjection',
   OutboxMessage: 'OutboxMessage'
 } as const
 
@@ -148,10 +149,13 @@ export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[k
 
 export const ConversationMappingScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   channel: 'channel',
   externalId: 'externalId',
   eventId: 'eventId',
   conversationId: 'conversationId',
+  internalConversationId: 'internalConversationId',
+  provider: 'provider',
   mappingType: 'mappingType',
   metadata: 'metadata',
   createdAt: 'createdAt',
@@ -163,6 +167,7 @@ export type ConversationMappingScalarFieldEnum = (typeof ConversationMappingScal
 
 export const SupportConversationScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   eventId: 'eventId',
   invitationId: 'invitationId',
   guestUserId: 'guestUserId',
@@ -208,7 +213,11 @@ export const SupportMessageScalarFieldEnum = {
   mimeType: 'mimeType',
   status: 'status',
   externalId: 'externalId',
+  provider: 'provider',
   error: 'error',
+  emailMessageId: 'emailMessageId',
+  emailInReplyTo: 'emailInReplyTo',
+  emailReferences: 'emailReferences',
   deliveredAt: 'deliveredAt',
   readAt: 'readAt',
   editedAt: 'editedAt',
@@ -263,7 +272,9 @@ export type SupportQuickReplyScalarFieldEnum = (typeof SupportQuickReplyScalarFi
 
 export const InternalConversationScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   eventId: 'eventId',
+  channel: 'channel',
   title: 'title',
   description: 'description',
   type: 'type',
@@ -283,10 +294,17 @@ export const InternalMessageScalarFieldEnum = {
   id: 'id',
   conversationId: 'conversationId',
   senderId: 'senderId',
+  direction: 'direction',
+  channel: 'channel',
+  provider: 'provider',
+  externalId: 'externalId',
   body: 'body',
   priority: 'priority',
   createdAt: 'createdAt',
-  editedAt: 'editedAt'
+  editedAt: 'editedAt',
+  emailMessageId: 'emailMessageId',
+  emailInReplyTo: 'emailInReplyTo',
+  emailReferences: 'emailReferences'
 } as const
 
 export type InternalMessageScalarFieldEnum = (typeof InternalMessageScalarFieldEnum)[keyof typeof InternalMessageScalarFieldEnum]
@@ -315,6 +333,17 @@ export const EventAccessProjectionScalarFieldEnum = {
 } as const
 
 export type EventAccessProjectionScalarFieldEnum = (typeof EventAccessProjectionScalarFieldEnum)[keyof typeof EventAccessProjectionScalarFieldEnum]
+
+
+export const UserContactProjectionScalarFieldEnum = {
+  userId: 'userId',
+  email: 'email',
+  primaryPhone: 'primaryPhone',
+  displayName: 'displayName',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserContactProjectionScalarFieldEnum = (typeof UserContactProjectionScalarFieldEnum)[keyof typeof UserContactProjectionScalarFieldEnum]
 
 
 export const OutboxMessageScalarFieldEnum = {

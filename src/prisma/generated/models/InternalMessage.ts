@@ -28,30 +28,51 @@ export type InternalMessageMinAggregateOutputType = {
   id: string | null
   conversationId: string | null
   senderId: string | null
+  direction: $Enums.MessageDirection | null
+  channel: $Enums.ConversationChannel | null
+  provider: string | null
+  externalId: string | null
   body: string | null
   priority: $Enums.InternalMessagePriority | null
   createdAt: Date | null
   editedAt: Date | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
 }
 
 export type InternalMessageMaxAggregateOutputType = {
   id: string | null
   conversationId: string | null
   senderId: string | null
+  direction: $Enums.MessageDirection | null
+  channel: $Enums.ConversationChannel | null
+  provider: string | null
+  externalId: string | null
   body: string | null
   priority: $Enums.InternalMessagePriority | null
   createdAt: Date | null
   editedAt: Date | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
 }
 
 export type InternalMessageCountAggregateOutputType = {
   id: number
   conversationId: number
   senderId: number
+  direction: number
+  channel: number
+  provider: number
+  externalId: number
   body: number
   priority: number
   createdAt: number
   editedAt: number
+  emailMessageId: number
+  emailInReplyTo: number
+  emailReferences: number
   _all: number
 }
 
@@ -60,30 +81,51 @@ export type InternalMessageMinAggregateInputType = {
   id?: true
   conversationId?: true
   senderId?: true
+  direction?: true
+  channel?: true
+  provider?: true
+  externalId?: true
   body?: true
   priority?: true
   createdAt?: true
   editedAt?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
 }
 
 export type InternalMessageMaxAggregateInputType = {
   id?: true
   conversationId?: true
   senderId?: true
+  direction?: true
+  channel?: true
+  provider?: true
+  externalId?: true
   body?: true
   priority?: true
   createdAt?: true
   editedAt?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
 }
 
 export type InternalMessageCountAggregateInputType = {
   id?: true
   conversationId?: true
   senderId?: true
+  direction?: true
+  channel?: true
+  provider?: true
+  externalId?: true
   body?: true
   priority?: true
   createdAt?: true
   editedAt?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
   _all?: true
 }
 
@@ -163,10 +205,17 @@ export type InternalMessageGroupByOutputType = {
   id: string
   conversationId: string
   senderId: string
+  direction: $Enums.MessageDirection
+  channel: $Enums.ConversationChannel
+  provider: string | null
+  externalId: string | null
   body: string
   priority: $Enums.InternalMessagePriority
   createdAt: Date
   editedAt: Date | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
   _count: InternalMessageCountAggregateOutputType | null
   _min: InternalMessageMinAggregateOutputType | null
   _max: InternalMessageMaxAggregateOutputType | null
@@ -194,10 +243,17 @@ export type InternalMessageWhereInput = {
   id?: Prisma.StringFilter<"InternalMessage"> | string
   conversationId?: Prisma.StringFilter<"InternalMessage"> | string
   senderId?: Prisma.UuidFilter<"InternalMessage"> | string
+  direction?: Prisma.EnumMessageDirectionFilter<"InternalMessage"> | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFilter<"InternalMessage"> | $Enums.ConversationChannel
+  provider?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  externalId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
   body?: Prisma.StringFilter<"InternalMessage"> | string
   priority?: Prisma.EnumInternalMessagePriorityFilter<"InternalMessage"> | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFilter<"InternalMessage"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"InternalMessage"> | Date | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
   conversation?: Prisma.XOR<Prisma.InternalConversationScalarRelationFilter, Prisma.InternalConversationWhereInput>
 }
 
@@ -205,35 +261,57 @@ export type InternalMessageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalId?: Prisma.SortOrderInput | Prisma.SortOrder
   body?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailReferences?: Prisma.SortOrderInput | Prisma.SortOrder
   conversation?: Prisma.InternalConversationOrderByWithRelationInput
 }
 
 export type InternalMessageWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  uq_internal_message_provider_external?: Prisma.InternalMessageUq_internal_message_provider_externalCompoundUniqueInput
   AND?: Prisma.InternalMessageWhereInput | Prisma.InternalMessageWhereInput[]
   OR?: Prisma.InternalMessageWhereInput[]
   NOT?: Prisma.InternalMessageWhereInput | Prisma.InternalMessageWhereInput[]
   conversationId?: Prisma.StringFilter<"InternalMessage"> | string
   senderId?: Prisma.UuidFilter<"InternalMessage"> | string
+  direction?: Prisma.EnumMessageDirectionFilter<"InternalMessage"> | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFilter<"InternalMessage"> | $Enums.ConversationChannel
+  provider?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  externalId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
   body?: Prisma.StringFilter<"InternalMessage"> | string
   priority?: Prisma.EnumInternalMessagePriorityFilter<"InternalMessage"> | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFilter<"InternalMessage"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"InternalMessage"> | Date | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
   conversation?: Prisma.XOR<Prisma.InternalConversationScalarRelationFilter, Prisma.InternalConversationWhereInput>
-}, "id">
+}, "id" | "uq_internal_message_provider_external">
 
 export type InternalMessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalId?: Prisma.SortOrderInput | Prisma.SortOrder
   body?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailReferences?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.InternalMessageCountOrderByAggregateInput
   _max?: Prisma.InternalMessageMaxOrderByAggregateInput
   _min?: Prisma.InternalMessageMinOrderByAggregateInput
@@ -246,19 +324,33 @@ export type InternalMessageScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"InternalMessage"> | string
   conversationId?: Prisma.StringWithAggregatesFilter<"InternalMessage"> | string
   senderId?: Prisma.UuidWithAggregatesFilter<"InternalMessage"> | string
+  direction?: Prisma.EnumMessageDirectionWithAggregatesFilter<"InternalMessage"> | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelWithAggregatesFilter<"InternalMessage"> | $Enums.ConversationChannel
+  provider?: Prisma.StringNullableWithAggregatesFilter<"InternalMessage"> | string | null
+  externalId?: Prisma.StringNullableWithAggregatesFilter<"InternalMessage"> | string | null
   body?: Prisma.StringWithAggregatesFilter<"InternalMessage"> | string
   priority?: Prisma.EnumInternalMessagePriorityWithAggregatesFilter<"InternalMessage"> | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InternalMessage"> | Date | string
   editedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InternalMessage"> | Date | string | null
+  emailMessageId?: Prisma.StringNullableWithAggregatesFilter<"InternalMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableWithAggregatesFilter<"InternalMessage"> | string | null
+  emailReferences?: Prisma.StringNullableWithAggregatesFilter<"InternalMessage"> | string | null
 }
 
 export type InternalMessageCreateInput = {
   id?: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   conversation: Prisma.InternalConversationCreateNestedOneWithoutMessagesInput
 }
 
@@ -266,19 +358,33 @@ export type InternalMessageUncheckedCreateInput = {
   id?: string
   conversationId: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
 }
 
 export type InternalMessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversation?: Prisma.InternalConversationUpdateOneRequiredWithoutMessagesNestedInput
 }
 
@@ -286,39 +392,67 @@ export type InternalMessageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InternalMessageCreateManyInput = {
   id?: string
   conversationId: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
 }
 
 export type InternalMessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InternalMessageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InternalMessageListRelationFilter = {
@@ -331,34 +465,60 @@ export type InternalMessageOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type InternalMessageUq_internal_message_provider_externalCompoundUniqueInput = {
+  provider: string
+  externalId: string
+}
+
 export type InternalMessageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
   body?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
 }
 
 export type InternalMessageMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
   body?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
 }
 
 export type InternalMessageMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
   body?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
 }
 
 export type InternalMessageCreateNestedManyWithoutConversationInput = {
@@ -410,19 +570,33 @@ export type EnumInternalMessagePriorityFieldUpdateOperationsInput = {
 export type InternalMessageCreateWithoutConversationInput = {
   id?: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
 }
 
 export type InternalMessageUncheckedCreateWithoutConversationInput = {
   id?: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
 }
 
 export type InternalMessageCreateOrConnectWithoutConversationInput = {
@@ -458,46 +632,81 @@ export type InternalMessageScalarWhereInput = {
   id?: Prisma.StringFilter<"InternalMessage"> | string
   conversationId?: Prisma.StringFilter<"InternalMessage"> | string
   senderId?: Prisma.UuidFilter<"InternalMessage"> | string
+  direction?: Prisma.EnumMessageDirectionFilter<"InternalMessage"> | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFilter<"InternalMessage"> | $Enums.ConversationChannel
+  provider?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  externalId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
   body?: Prisma.StringFilter<"InternalMessage"> | string
   priority?: Prisma.EnumInternalMessagePriorityFilter<"InternalMessage"> | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFilter<"InternalMessage"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"InternalMessage"> | Date | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"InternalMessage"> | string | null
 }
 
 export type InternalMessageCreateManyConversationInput = {
   id?: string
   senderId: string
+  direction?: $Enums.MessageDirection
+  channel?: $Enums.ConversationChannel
+  provider?: string | null
+  externalId?: string | null
   body: string
   priority?: $Enums.InternalMessagePriority
   createdAt?: Date | string
   editedAt?: Date | string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
 }
 
 export type InternalMessageUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InternalMessageUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InternalMessageUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumInternalMessagePriorityFieldUpdateOperationsInput | $Enums.InternalMessagePriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -506,10 +715,17 @@ export type InternalMessageSelect<ExtArgs extends runtime.Types.Extensions.Inter
   id?: boolean
   conversationId?: boolean
   senderId?: boolean
+  direction?: boolean
+  channel?: boolean
+  provider?: boolean
+  externalId?: boolean
   body?: boolean
   priority?: boolean
   createdAt?: boolean
   editedAt?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   conversation?: boolean | Prisma.InternalConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["internalMessage"]>
 
@@ -517,10 +733,17 @@ export type InternalMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   id?: boolean
   conversationId?: boolean
   senderId?: boolean
+  direction?: boolean
+  channel?: boolean
+  provider?: boolean
+  externalId?: boolean
   body?: boolean
   priority?: boolean
   createdAt?: boolean
   editedAt?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   conversation?: boolean | Prisma.InternalConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["internalMessage"]>
 
@@ -528,10 +751,17 @@ export type InternalMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   id?: boolean
   conversationId?: boolean
   senderId?: boolean
+  direction?: boolean
+  channel?: boolean
+  provider?: boolean
+  externalId?: boolean
   body?: boolean
   priority?: boolean
   createdAt?: boolean
   editedAt?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   conversation?: boolean | Prisma.InternalConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["internalMessage"]>
 
@@ -539,13 +769,20 @@ export type InternalMessageSelectScalar = {
   id?: boolean
   conversationId?: boolean
   senderId?: boolean
+  direction?: boolean
+  channel?: boolean
+  provider?: boolean
+  externalId?: boolean
   body?: boolean
   priority?: boolean
   createdAt?: boolean
   editedAt?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
 }
 
-export type InternalMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "body" | "priority" | "createdAt" | "editedAt", ExtArgs["result"]["internalMessage"]>
+export type InternalMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "direction" | "channel" | "provider" | "externalId" | "body" | "priority" | "createdAt" | "editedAt" | "emailMessageId" | "emailInReplyTo" | "emailReferences", ExtArgs["result"]["internalMessage"]>
 export type InternalMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.InternalConversationDefaultArgs<ExtArgs>
 }
@@ -565,10 +802,17 @@ export type $InternalMessagePayload<ExtArgs extends runtime.Types.Extensions.Int
     id: string
     conversationId: string
     senderId: string
+    direction: $Enums.MessageDirection
+    channel: $Enums.ConversationChannel
+    provider: string | null
+    externalId: string | null
     body: string
     priority: $Enums.InternalMessagePriority
     createdAt: Date
     editedAt: Date | null
+    emailMessageId: string | null
+    emailInReplyTo: string | null
+    emailReferences: string | null
   }, ExtArgs["result"]["internalMessage"]>
   composites: {}
 }
@@ -996,10 +1240,17 @@ export interface InternalMessageFieldRefs {
   readonly id: Prisma.FieldRef<"InternalMessage", 'String'>
   readonly conversationId: Prisma.FieldRef<"InternalMessage", 'String'>
   readonly senderId: Prisma.FieldRef<"InternalMessage", 'String'>
+  readonly direction: Prisma.FieldRef<"InternalMessage", 'MessageDirection'>
+  readonly channel: Prisma.FieldRef<"InternalMessage", 'ConversationChannel'>
+  readonly provider: Prisma.FieldRef<"InternalMessage", 'String'>
+  readonly externalId: Prisma.FieldRef<"InternalMessage", 'String'>
   readonly body: Prisma.FieldRef<"InternalMessage", 'String'>
   readonly priority: Prisma.FieldRef<"InternalMessage", 'InternalMessagePriority'>
   readonly createdAt: Prisma.FieldRef<"InternalMessage", 'DateTime'>
   readonly editedAt: Prisma.FieldRef<"InternalMessage", 'DateTime'>
+  readonly emailMessageId: Prisma.FieldRef<"InternalMessage", 'String'>
+  readonly emailInReplyTo: Prisma.FieldRef<"InternalMessage", 'String'>
+  readonly emailReferences: Prisma.FieldRef<"InternalMessage", 'String'>
 }
     
 

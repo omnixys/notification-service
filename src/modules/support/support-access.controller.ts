@@ -16,7 +16,7 @@ import { Public } from '@omnixys/security-ts';
 import { isUUID } from 'class-validator';
 import { timingSafeEqual } from 'node:crypto';
 
-const { INTERNAL_GATEWAY_TOKEN } = env;
+const { EVENT_TENANT_MAP, INTERNAL_GATEWAY_TOKEN } = env;
 
 @Public()
 @Controller('internal/support/access')
@@ -28,12 +28,15 @@ export class SupportAccessController {
     @Headers('x-internal-token') token: string | undefined,
     @Query('eventId') eventId: string,
     @Query('userId') userId: string,
+    @Query('tenantId') tenantId: string,
   ): Promise<{ eventId: string }> {
     assertInternalToken(token);
     if (
       !eventId ||
       !userId ||
-      !(await this.conversations.canUserViewEventSupport(eventId, userId))
+      !isUUID(tenantId) ||
+      EVENT_TENANT_MAP[eventId] !== tenantId ||
+      !(await this.conversations.canUserViewEventSupport(eventId, userId, tenantId))
     ) {
       throw new ForbiddenException({ code: 'SUPPORT_ACCESS_DENIED' });
     }
@@ -45,9 +48,17 @@ export class SupportAccessController {
     @Headers('x-internal-token') token: string | undefined,
     @Query('conversationId') conversationId: string,
     @Query('userId') userId: string,
+    @Query('tenantId') tenantId: string,
   ): Promise<{ conversationId: string; eventId: string }> {
     assertInternalToken(token);
-    const access = await this.conversations.canUserAccessSubscription(conversationId, userId);
+    if (!isUUID(tenantId)) {
+      throw new ForbiddenException({ code: 'SUPPORT_ACCESS_DENIED' });
+    }
+    const access = await this.conversations.canUserAccessSubscription(
+      conversationId,
+      userId,
+      tenantId,
+    );
     if (!access.eventId) {
       throw new NotFoundException({ code: 'SUPPORT_CONVERSATION_NOT_FOUND' });
     }
@@ -69,6 +80,7 @@ export class SupportInboundController {
     @Body()
     body: {
       externalId: string;
+      tenantId: string;
       eventId: string;
       from: string;
       senderName?: string;
@@ -80,16 +92,21 @@ export class SupportInboundController {
     assertInternalToken(token);
     if (
       !body.externalId ||
+      !isUUID(body.tenantId) ||
       !isUUID(body.eventId) ||
       !body.from ||
       (!body.body?.trim() && !body.mediaUrl)
     ) {
       throw new BadRequestException({ code: 'SUPPORT_INBOUND_INVALID' });
     }
+    if (EVENT_TENANT_MAP[body.eventId] !== body.tenantId) {
+      throw new ForbiddenException({ code: 'SUPPORT_INBOUND_TENANT_ROUTE_INVALID' });
+    }
     const existing = await this.messages.findInboundMessage(
       body.externalId,
       body.from,
       body.eventId,
+      body.tenantId,
     );
     if (existing) {
       return {
@@ -98,12 +115,42 @@ export class SupportInboundController {
         duplicate: true,
       };
     }
-    const message = await this.messages.receiveInboundMessage(body);
+    let message;
+    try {
+      message = await this.messages.receiveInboundMessage(body);
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+      const winner = await this.messages.findInboundMessage(
+        body.externalId,
+        body.from,
+        body.eventId,
+        body.tenantId,
+      );
+      if (!winner) {
+        throw error;
+      }
+      return {
+        conversationId: winner.conversationId,
+        messageId: winner.id,
+        duplicate: true,
+      };
+    }
     if (!message) {
       throw new NotFoundException({ code: 'SUPPORT_INBOUND_UNMATCHED' });
     }
     return { conversationId: message.conversationId, messageId: message.id, duplicate: false };
   }
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002'
+  );
 }
 
 function assertInternalToken(candidate: string | undefined): void {

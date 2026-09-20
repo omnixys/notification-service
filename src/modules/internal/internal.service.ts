@@ -1,15 +1,18 @@
-import { env } from '../../config/env.js';
 import type {
   InternalConversation,
   InternalMessage,
   InternalParticipant,
+  Prisma,
 } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { toApiChannel, InternalConversationChannel } from '../internal/entities/internal-conversation.entity.js';
 import {
   ConversationAccessDeniedException,
   ConversationNotFoundException,
 } from '../notification/errors/notification.error.js';
-import { Injectable } from '@nestjs/common';
+import { TenantRouteService } from '../support/common/tenant-route.service.js';
+import { ConversationOutboxService } from '../support/modules/outbox/conversation-outbox.service.js';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { EventPermissionKey } from '@omnixys/contracts-ts';
 import type {
   InternalConversationCreatedDTO,
@@ -21,8 +24,6 @@ import { getLogger } from '@omnixys/logger-ts';
 import { EventPermissionResolver } from '@omnixys/security-ts';
 import type { CurrentUserData } from '@omnixys/security-ts';
 
-const { DEFAULT_TENANT_ID } = env;
-
 @Injectable()
 export class InternalService {
   readonly #logger = getLogger(InternalService.name);
@@ -30,14 +31,20 @@ export class InternalService {
     private readonly prisma: PrismaService,
     private readonly kafka: KafkaProducerService,
     private readonly permissionResolver: EventPermissionResolver,
+    private readonly tenantRoutes: TenantRouteService = new TenantRouteService(),
+    @Optional()
+    @Inject(ConversationOutboxService)
+    private readonly outbox?: ConversationOutboxService,
   ) {}
 
   async findConversations(eventId: string, user: CurrentUserData): Promise<InternalConversation[]> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     await this.requireSupportView(eventId, user);
 
-    return this.prisma.internalConversation.findMany({
+    const conversations = await this.prisma.internalConversation.findMany({
       where: {
         eventId,
+        tenantId,
         isActive: true,
         OR: [
           { type: 'BROADCAST' },
@@ -51,11 +58,47 @@ export class InternalService {
       include: { participants: { where: { leftAt: null } } },
       orderBy: { updatedAt: 'desc' },
     });
+
+    const unreadCounts = await this.countUnreadMessages(conversations, user.id);
+    return conversations.map((conversation) => ({
+      ...conversation,
+      unreadCount: unreadCounts.get(conversation.id) ?? 0,
+    }));
+  }
+
+  private async countUnreadMessages(
+    conversations: Prisma.InternalConversationGetPayload<{
+      include: { participants: true };
+    }>[],
+    userId: string,
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    await Promise.all(
+      conversations.map(async (conversation) => {
+        const participant = conversation.participants?.find((p) => p.userId === userId);
+        if (!participant) {
+          counts.set(conversation.id, 0);
+          return;
+        }
+        const lastReadAt = participant.lastReadAt;
+        const count = await this.prisma.internalMessage.count({
+          where: {
+            conversationId: conversation.id,
+            ...(lastReadAt
+              ? { createdAt: { gt: lastReadAt } }
+              : { createdAt: { gt: new Date(0) }, senderId: { not: userId } }),
+          },
+        });
+        counts.set(conversation.id, count);
+      }),
+    );
+    return counts;
   }
 
   async findConversationById(id: string, user: CurrentUserData): Promise<InternalConversation> {
-    const conversation = await this.prisma.internalConversation.findUnique({
-      where: { id },
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
+    const conversation = await this.prisma.internalConversation.findFirst({
+      where: { id, tenantId },
     });
 
     if (!conversation) {
@@ -98,6 +141,7 @@ export class InternalService {
     },
     user: CurrentUserData,
   ): Promise<InternalConversation> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     // BROADCAST / ROLE_CHANNEL require ManageSupport.
     if (data.type === 'DIRECT') {
       await this.requireSupportView(eventId, user);
@@ -114,7 +158,14 @@ export class InternalService {
 
       // Fast path: hash-based lookup (unique constraint prevents duplicates)
       const byHash = await this.prisma.internalConversation.findFirst({
-        where: { eventId, type: 'DIRECT', isActive: true, participantHash },
+        where: {
+          tenantId,
+          eventId,
+          channel: 'WEBCHAT',
+          type: 'DIRECT',
+          isActive: true,
+          participantHash,
+        },
       });
       if (byHash) {
         return byHash;
@@ -124,6 +175,8 @@ export class InternalService {
       const existing = await this.prisma.internalConversation.findFirst({
         where: {
           eventId,
+          tenantId,
+          channel: 'WEBCHAT',
           type: 'DIRECT',
           isActive: true,
           participants: {
@@ -153,27 +206,52 @@ export class InternalService {
         ? [...participantIds].sort().join('|')
         : undefined;
 
-    const conversation = await this.prisma.internalConversation.create({
-      data: {
-        eventId,
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        roleId: data.roleId,
-        participantHash,
-        createdBy: user.id,
-        isActive: true,
-      },
-    });
-
-    // Always add creator as participant
-    await this.prisma.internalParticipant.createMany({
-      data: Array.from(participantIds).map((userId) => ({
-        conversationId: conversation.id,
-        userId,
-      })),
-      skipDuplicates: true,
-    });
+    let conversation: InternalConversation;
+    try {
+      conversation = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.internalConversation.create({
+          data: {
+            tenantId,
+            eventId,
+            channel: 'WEBCHAT',
+            title: data.title,
+            description: data.description,
+            type: data.type,
+            roleId: data.roleId,
+            participantHash,
+            createdBy: user.id,
+            isActive: true,
+          },
+        });
+        await tx.internalParticipant.createMany({
+          data: Array.from(participantIds).map((userId) => ({
+            conversationId: created.id,
+            userId,
+          })),
+          skipDuplicates: true,
+        });
+        return created;
+      });
+    } catch (error) {
+      if (data.type !== 'DIRECT' || !participantHash || !isUniqueConstraintError(error)) {
+        throw error;
+      }
+      const winner = await this.prisma.internalConversation.findUnique({
+        where: {
+          uq_internal_conversation: {
+            tenantId,
+            eventId,
+            channel: 'WEBCHAT',
+            type: 'DIRECT',
+            participantHash,
+          },
+        },
+      });
+      if (!winner) {
+        throw error;
+      }
+      return winner;
+    }
 
     await this.kafka.send({
       topic: KafkaTopics.conversation.internalCreated,
@@ -191,7 +269,7 @@ export class InternalService {
         operation: 'Internal Conversation Created',
         version: '1',
         actorId: user.id,
-        tenantId: DEFAULT_TENANT_ID,
+        tenantId,
       },
     });
 
@@ -213,51 +291,66 @@ export class InternalService {
     data: { body: string; priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' },
     user: CurrentUserData,
   ): Promise<InternalMessage> {
-    await this.findConversationById(conversationId, user);
+    const conversation = await this.findConversationById(conversationId, user);
 
     if (!(await this.isParticipant(conversationId, user.id))) {
       throw new ConversationAccessDeniedException(conversationId);
     }
-
-    const message = await this.prisma.internalMessage.create({
-      data: {
-        conversationId,
-        senderId: user.id,
-        body: data.body,
-        priority: data.priority ?? 'NORMAL',
-      },
-    });
-
-    await this.prisma.internalConversation.update({
-      where: { id: conversationId },
-      data: { updatedAt: new Date() },
-    });
 
     const participants = await this.prisma.internalParticipant.findMany({
       where: { conversationId, leftAt: null },
       select: { userId: true },
     });
 
-    await this.kafka.send({
-      topic: KafkaTopics.conversation.internalMessage,
-      payload: {
-        id: message.id,
-        conversationId: message.conversationId,
-        senderId: message.senderId,
-        body: message.body,
-        priority: message.priority,
-        createdAt: message.createdAt.toISOString(),
-        participantIds: participants.map((p) => p.userId),
-      } satisfies InternalMessageSentDTO,
-      meta: {
-        clazz: this.constructor.name,
-        type: 'EVENT',
-        service: 'internal-service',
-        operation: 'Internal Message Sent',
-        version: '1',
-        actorId: user.id,
-        tenantId: DEFAULT_TENANT_ID,
-      },
+    const message = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.internalMessage.create({
+        data: {
+          conversationId,
+          senderId: user.id,
+          channel: conversation.channel,
+          body: data.body,
+          priority: data.priority ?? 'NORMAL',
+        },
+      });
+      await tx.internalConversation.update({
+        where: { id: conversationId },
+        data: { updatedAt: new Date() },
+      });
+      const payload: InternalMessageSentDTO & { channel: InternalConversationChannel } = {
+        id: created.id,
+        conversationId: created.conversationId,
+        senderId: created.senderId,
+        channel: toApiChannel(conversation.channel),
+        body: created.body,
+        priority: created.priority,
+        createdAt: created.createdAt.toISOString(),
+        participantIds: participants.map((participant) => participant.userId),
+      };
+      const tenantId =
+        conversation.tenantId ?? this.tenantRoutes.requireEventTenant(conversation.eventId);
+      if (this.outbox) {
+        await this.outbox.enqueue(tx, {
+          topic: KafkaTopics.conversation.internalMessage,
+          payload,
+          tenantId,
+          key: conversationId,
+          actorId: user.id,
+          operation: 'Internal Message Sent',
+        });
+      } else {
+        await this.kafka.send({
+          topic: KafkaTopics.conversation.internalMessage,
+          payload,
+          meta: {
+            type: 'EVENT',
+            service: 'internal-service',
+            operation: 'Internal Message Sent',
+            actorId: user.id,
+            tenantId,
+          },
+        });
+      }
+      return created;
     });
 
     this.#logger.debug(
@@ -273,7 +366,7 @@ export class InternalService {
   }
 
   async markAsRead(conversationId: string, user: CurrentUserData): Promise<InternalParticipant> {
-    await this.findConversationById(conversationId, user);
+    const conversation = await this.findConversationById(conversationId, user);
 
     const participant = await this.prisma.internalParticipant.findUnique({
       where: {
@@ -307,7 +400,8 @@ export class InternalService {
         operation: 'Internal Read Receipt',
         version: '1',
         actorId: user.id,
-        tenantId: DEFAULT_TENANT_ID,
+        tenantId:
+          conversation.tenantId ?? this.tenantRoutes.requireEventTenant(conversation.eventId),
       },
     });
 
@@ -315,13 +409,7 @@ export class InternalService {
   }
 
   async archiveConversation(id: string, user: CurrentUserData): Promise<InternalConversation> {
-    const conversation = await this.prisma.internalConversation.findUnique({
-      where: { id },
-    });
-
-    if (!conversation) {
-      throw new ConversationNotFoundException(id);
-    }
+    const conversation = await this.findConversationById(id, user);
 
     await this.requireSupportManage(conversation.eventId, user);
 
@@ -400,4 +488,13 @@ export class InternalService {
     const permissions = await this.permissionResolver.getPermissionsForUser(user.id, eventId);
     return permissions.includes(permission);
   }
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002'
+  );
 }

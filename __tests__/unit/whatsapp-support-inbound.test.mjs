@@ -6,6 +6,7 @@ import { MappingService } from '../../dist/modules/support/modules/mapping/mappi
 import { MessageService } from '../../dist/modules/support/modules/message/message.service.js';
 
 const EVENT_ID = '2dae12d9-025f-72cd-a285-87130fd6f63e';
+const TENANT_ID = '6e788f7f-c233-4cb8-bbde-c0b855e564be';
 
 const logger = {
   log() {
@@ -69,7 +70,10 @@ test('new WhatsApp contact creates the configured event conversation and first m
     },
   };
   const service = new MessageService(
-    { async $transaction(operation) { return operation(tx); } },
+    {
+      eventAccessProjection: { async findMany() { return []; } },
+      async $transaction(operation) { return operation(tx); },
+    },
     {},
     { async send(event) { kafkaEvents.push(event); } },
     { async publish(topic, payload) { realtimeEvents.push({ topic, payload }); } },
@@ -78,11 +82,16 @@ test('new WhatsApp contact creates the configured event conversation and first m
       return { conversationId: null, eventId: null, created: false };
     } },
     logger,
+    {
+      requireEventTenant: () => TENANT_ID,
+      requireCurrentTenant: () => TENANT_ID,
+    },
   );
 
   const result = await service.receiveInboundMessage({
     externalId: message.externalId,
     eventId: EVENT_ID,
+    tenantId: TENANT_ID,
     from: '49 1522 6049639@s.whatsapp.net',
     senderName: 'WhatsApp Guest',
     body: message.body,
@@ -93,8 +102,10 @@ test('new WhatsApp contact creates the configured event conversation and first m
     channel: 'WHATSAPP',
     externalId: '+4915226049639',
     eventId: EVENT_ID,
+    tenantId: TENANT_ID,
     conversationId: conversation.id,
     mappingType: 'AUTO',
+    provider: 'EVOLUTION',
   });
   assert.equal(kafkaEvents.length, 1);
   assert.equal(kafkaEvents[0].topic, KafkaTopics.conversation.guestReplied);
@@ -125,6 +136,7 @@ test('WhatsApp mapping is restricted to the configured event', async () => {
     'WHATSAPP',
     '4915226049639@s.whatsapp.net',
     EVENT_ID,
+    TENANT_ID,
   );
 
   assert.equal(result.conversationId, null);
@@ -132,5 +144,6 @@ test('WhatsApp mapping is restricted to the configured event', async () => {
     channel: 'WHATSAPP',
     externalId: '+4915226049639',
     eventId: EVENT_ID,
+    tenantId: TENANT_ID,
   });
 });

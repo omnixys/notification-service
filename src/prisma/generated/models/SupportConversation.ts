@@ -38,6 +38,7 @@ export type SupportConversationSumAggregateOutputType = {
 
 export type SupportConversationMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   eventId: string | null
   invitationId: string | null
   guestUserId: string | null
@@ -68,6 +69,7 @@ export type SupportConversationMinAggregateOutputType = {
 
 export type SupportConversationMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   eventId: string | null
   invitationId: string | null
   guestUserId: string | null
@@ -98,6 +100,7 @@ export type SupportConversationMaxAggregateOutputType = {
 
 export type SupportConversationCountAggregateOutputType = {
   id: number
+  tenantId: number
   eventId: number
   invitationId: number
   guestUserId: number
@@ -142,6 +145,7 @@ export type SupportConversationSumAggregateInputType = {
 
 export type SupportConversationMinAggregateInputType = {
   id?: true
+  tenantId?: true
   eventId?: true
   invitationId?: true
   guestUserId?: true
@@ -172,6 +176,7 @@ export type SupportConversationMinAggregateInputType = {
 
 export type SupportConversationMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   eventId?: true
   invitationId?: true
   guestUserId?: true
@@ -202,6 +207,7 @@ export type SupportConversationMaxAggregateInputType = {
 
 export type SupportConversationCountAggregateInputType = {
   id?: true
+  tenantId?: true
   eventId?: true
   invitationId?: true
   guestUserId?: true
@@ -321,6 +327,7 @@ export type SupportConversationGroupByArgs<ExtArgs extends runtime.Types.Extensi
 
 export type SupportConversationGroupByOutputType = {
   id: string
+  tenantId: string | null
   eventId: string
   invitationId: string | null
   guestUserId: string | null
@@ -376,6 +383,7 @@ export type SupportConversationWhereInput = {
   OR?: Prisma.SupportConversationWhereInput[]
   NOT?: Prisma.SupportConversationWhereInput | Prisma.SupportConversationWhereInput[]
   id?: Prisma.StringFilter<"SupportConversation"> | string
+  tenantId?: Prisma.UuidNullableFilter<"SupportConversation"> | string | null
   eventId?: Prisma.StringFilter<"SupportConversation"> | string
   invitationId?: Prisma.StringNullableFilter<"SupportConversation"> | string | null
   guestUserId?: Prisma.UuidNullableFilter<"SupportConversation"> | string | null
@@ -411,6 +419,7 @@ export type SupportConversationWhereInput = {
 
 export type SupportConversationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrderInput | Prisma.SortOrder
   guestUserId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -449,6 +458,7 @@ export type SupportConversationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.SupportConversationWhereInput | Prisma.SupportConversationWhereInput[]
   OR?: Prisma.SupportConversationWhereInput[]
   NOT?: Prisma.SupportConversationWhereInput | Prisma.SupportConversationWhereInput[]
+  tenantId?: Prisma.UuidNullableFilter<"SupportConversation"> | string | null
   eventId?: Prisma.StringFilter<"SupportConversation"> | string
   invitationId?: Prisma.StringNullableFilter<"SupportConversation"> | string | null
   guestUserId?: Prisma.UuidNullableFilter<"SupportConversation"> | string | null
@@ -484,6 +494,7 @@ export type SupportConversationWhereUniqueInput = Prisma.AtLeast<{
 
 export type SupportConversationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrderInput | Prisma.SortOrder
   guestUserId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -524,6 +535,7 @@ export type SupportConversationScalarWhereWithAggregatesInput = {
   OR?: Prisma.SupportConversationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.SupportConversationScalarWhereWithAggregatesInput | Prisma.SupportConversationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"SupportConversation"> | string
+  tenantId?: Prisma.UuidNullableWithAggregatesFilter<"SupportConversation"> | string | null
   eventId?: Prisma.StringWithAggregatesFilter<"SupportConversation"> | string
   invitationId?: Prisma.StringNullableWithAggregatesFilter<"SupportConversation"> | string | null
   guestUserId?: Prisma.UuidNullableWithAggregatesFilter<"SupportConversation"> | string | null
@@ -556,6 +568,7 @@ export type SupportConversationScalarWhereWithAggregatesInput = {
 
 export type SupportConversationCreateInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -591,6 +604,7 @@ export type SupportConversationCreateInput = {
 
 export type SupportConversationUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -626,6 +640,7 @@ export type SupportConversationUncheckedCreateInput = {
 
 export type SupportConversationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -661,6 +676,7 @@ export type SupportConversationUpdateInput = {
 
 export type SupportConversationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -696,6 +712,7 @@ export type SupportConversationUncheckedUpdateInput = {
 
 export type SupportConversationCreateManyInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -728,6 +745,7 @@ export type SupportConversationCreateManyInput = {
 
 export type SupportConversationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -760,6 +778,7 @@ export type SupportConversationUpdateManyMutationInput = {
 
 export type SupportConversationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -797,6 +816,7 @@ export type SupportConversationNullableScalarRelationFilter = {
 
 export type SupportConversationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrder
   guestUserId?: Prisma.SortOrder
@@ -834,6 +854,7 @@ export type SupportConversationAvgOrderByAggregateInput = {
 
 export type SupportConversationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrder
   guestUserId?: Prisma.SortOrder
@@ -864,6 +885,7 @@ export type SupportConversationMaxOrderByAggregateInput = {
 
 export type SupportConversationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrder
   guestUserId?: Prisma.SortOrder
@@ -965,6 +987,7 @@ export type SupportConversationUpdateOneRequiredWithoutAssignmentsNestedInput = 
 
 export type SupportConversationCreateWithoutMappingsInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -999,6 +1022,7 @@ export type SupportConversationCreateWithoutMappingsInput = {
 
 export type SupportConversationUncheckedCreateWithoutMappingsInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -1049,6 +1073,7 @@ export type SupportConversationUpdateToOneWithWhereWithoutMappingsInput = {
 
 export type SupportConversationUpdateWithoutMappingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1083,6 +1108,7 @@ export type SupportConversationUpdateWithoutMappingsInput = {
 
 export type SupportConversationUncheckedUpdateWithoutMappingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1117,6 +1143,7 @@ export type SupportConversationUncheckedUpdateWithoutMappingsInput = {
 
 export type SupportConversationCreateWithoutMessagesInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -1151,6 +1178,7 @@ export type SupportConversationCreateWithoutMessagesInput = {
 
 export type SupportConversationUncheckedCreateWithoutMessagesInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -1201,6 +1229,7 @@ export type SupportConversationUpdateToOneWithWhereWithoutMessagesInput = {
 
 export type SupportConversationUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1235,6 +1264,7 @@ export type SupportConversationUpdateWithoutMessagesInput = {
 
 export type SupportConversationUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1269,6 +1299,7 @@ export type SupportConversationUncheckedUpdateWithoutMessagesInput = {
 
 export type SupportConversationCreateWithoutAssignmentsInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -1303,6 +1334,7 @@ export type SupportConversationCreateWithoutAssignmentsInput = {
 
 export type SupportConversationUncheckedCreateWithoutAssignmentsInput = {
   id?: string
+  tenantId?: string | null
   eventId: string
   invitationId?: string | null
   guestUserId?: string | null
@@ -1353,6 +1385,7 @@ export type SupportConversationUpdateToOneWithWhereWithoutAssignmentsInput = {
 
 export type SupportConversationUpdateWithoutAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1387,6 +1420,7 @@ export type SupportConversationUpdateWithoutAssignmentsInput = {
 
 export type SupportConversationUncheckedUpdateWithoutAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guestUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1470,6 +1504,7 @@ export type SupportConversationCountOutputTypeCountAssignmentsArgs<ExtArgs exten
 
 export type SupportConversationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   eventId?: boolean
   invitationId?: boolean
   guestUserId?: boolean
@@ -1506,6 +1541,7 @@ export type SupportConversationSelect<ExtArgs extends runtime.Types.Extensions.I
 
 export type SupportConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   eventId?: boolean
   invitationId?: boolean
   guestUserId?: boolean
@@ -1538,6 +1574,7 @@ export type SupportConversationSelectCreateManyAndReturn<ExtArgs extends runtime
 
 export type SupportConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   eventId?: boolean
   invitationId?: boolean
   guestUserId?: boolean
@@ -1570,6 +1607,7 @@ export type SupportConversationSelectUpdateManyAndReturn<ExtArgs extends runtime
 
 export type SupportConversationSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   eventId?: boolean
   invitationId?: boolean
   guestUserId?: boolean
@@ -1600,7 +1638,7 @@ export type SupportConversationSelectScalar = {
   closedAt?: boolean
 }
 
-export type SupportConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "invitationId" | "guestUserId" | "guestName" | "guestContact" | "subject" | "status" | "priority" | "assignedTo" | "assignedToUser" | "channel" | "lastMessageAt" | "lastMessagePreview" | "emailMessageId" | "emailInReplyTo" | "emailReferences" | "tags" | "metadata" | "unreadCount" | "guestUnreadCount" | "slaDeadline" | "escalatedAt" | "escalatedTo" | "internalNote" | "deletedAt" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["supportConversation"]>
+export type SupportConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "eventId" | "invitationId" | "guestUserId" | "guestName" | "guestContact" | "subject" | "status" | "priority" | "assignedTo" | "assignedToUser" | "channel" | "lastMessageAt" | "lastMessagePreview" | "emailMessageId" | "emailInReplyTo" | "emailReferences" | "tags" | "metadata" | "unreadCount" | "guestUnreadCount" | "slaDeadline" | "escalatedAt" | "escalatedTo" | "internalNote" | "deletedAt" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["supportConversation"]>
 export type SupportConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mappings?: boolean | Prisma.SupportConversation$mappingsArgs<ExtArgs>
   messages?: boolean | Prisma.SupportConversation$messagesArgs<ExtArgs>
@@ -1619,6 +1657,7 @@ export type $SupportConversationPayload<ExtArgs extends runtime.Types.Extensions
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     eventId: string
     invitationId: string | null
     guestUserId: string | null
@@ -2074,6 +2113,7 @@ export interface Prisma__SupportConversationClient<T, Null = never, ExtArgs exte
  */
 export interface SupportConversationFieldRefs {
   readonly id: Prisma.FieldRef<"SupportConversation", 'String'>
+  readonly tenantId: Prisma.FieldRef<"SupportConversation", 'String'>
   readonly eventId: Prisma.FieldRef<"SupportConversation", 'String'>
   readonly invitationId: Prisma.FieldRef<"SupportConversation", 'String'>
   readonly guestUserId: Prisma.FieldRef<"SupportConversation", 'String'>

@@ -1,6 +1,4 @@
 import type {
-  InternalConversation as PrismaInternalConversation,
-  InternalMessage as PrismaInternalMessage,
   InternalParticipant as PrismaInternalParticipant,
 } from '../../prisma/generated/client.js';
 import {
@@ -9,6 +7,8 @@ import {
   InternalMessage,
   InternalMessagePriority,
   InternalParticipant,
+  mapConversationChannel,
+  mapMessageChannel,
 } from './entities/internal-conversation.entity.js';
 import { InternalService } from './internal.service.js';
 import { UseGuards } from '@nestjs/common';
@@ -28,8 +28,9 @@ export class InternalResolver {
   async internalConversations(
     @Args('eventId') eventId: string,
     @CurrentUser() user: CurrentUserData,
-  ): Promise<PrismaInternalConversation[]> {
-    return this.internalService.findConversations(eventId, user);
+  ): Promise<InternalConversation[]> {
+    const conversations = await this.internalService.findConversations(eventId, user);
+    return conversations.map(mapConversationChannel) as unknown as InternalConversation[];
   }
 
   @Query(() => InternalConversation)
@@ -37,8 +38,9 @@ export class InternalResolver {
   async internalConversation(
     @Args('id') id: string,
     @CurrentUser() user: CurrentUserData,
-  ): Promise<PrismaInternalConversation> {
-    return this.internalService.findConversationById(id, user);
+  ): Promise<InternalConversation> {
+    const conversation = await this.internalService.findConversationById(id, user);
+    return mapConversationChannel(conversation) as unknown as InternalConversation;
   }
 
   @Query(() => [InternalMessage])
@@ -47,8 +49,9 @@ export class InternalResolver {
     @Args('conversationId') conversationId: string,
     @CurrentUser() user: CurrentUserData,
     @Args('limit', { nullable: true, type: () => Number }) limit?: number,
-  ): Promise<PrismaInternalMessage[]> {
-    return this.internalService.findMessages(conversationId, user, limit);
+  ): Promise<InternalMessage[]> {
+    const messages = await this.internalService.findMessages(conversationId, user, limit);
+    return messages.map(mapMessageChannel) as unknown as InternalMessage[];
   }
 
   @Mutation(() => InternalConversation)
@@ -62,8 +65,8 @@ export class InternalResolver {
     @Args('description', { nullable: true }) description?: string,
     @Args('participantIds', { nullable: true, type: () => [String] })
     participantIds?: string[],
-  ): Promise<PrismaInternalConversation> {
-    return this.internalService.createConversation(
+  ): Promise<InternalConversation> {
+    const conversation = await this.internalService.createConversation(
       eventId,
       {
         title,
@@ -73,6 +76,7 @@ export class InternalResolver {
       },
       user,
     );
+    return mapConversationChannel(conversation) as unknown as InternalConversation;
   }
 
   @Mutation(() => InternalMessage)
@@ -83,8 +87,8 @@ export class InternalResolver {
     @Args('body') body: string,
     @Args('priority', { nullable: true, type: () => InternalMessagePriority })
     priority?: InternalMessagePriority,
-  ): Promise<PrismaInternalMessage> {
-    return this.internalService.sendMessage(
+  ): Promise<InternalMessage> {
+    const message = await this.internalService.sendMessage(
       conversationId,
       {
         body,
@@ -92,6 +96,7 @@ export class InternalResolver {
       },
       user,
     );
+    return mapMessageChannel(message) as unknown as InternalMessage;
   }
 
   @Mutation(() => InternalParticipant)
@@ -108,7 +113,8 @@ export class InternalResolver {
   async archiveInternalConversation(
     @CurrentUser() user: CurrentUserData,
     @Args('id') id: string,
-  ): Promise<PrismaInternalConversation> {
-    return this.internalService.archiveConversation(id, user);
+  ): Promise<InternalConversation> {
+    const conversation = await this.internalService.archiveConversation(id, user);
+    return mapConversationChannel(conversation) as unknown as InternalConversation;
   }
 }

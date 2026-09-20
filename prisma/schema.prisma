@@ -208,11 +208,15 @@ enum ConversationPriority {
 model ConversationMapping {
   id String @id @default(uuid())
 
-  channel        ConversationChannel  @map("channel")
-  externalId     String               @map("external_id") // phone number (with @c.us), email address, etc.
-  eventId        String?              @map("event_id")
-  conversationId String?              @map("conversation_id")
-  conversation   SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  tenantId               String?               @map("tenant_id") @db.Uuid
+  channel                ConversationChannel   @map("channel")
+  externalId             String                @map("external_id") // phone number (with @c.us), email address, etc.
+  eventId                String?               @map("event_id")
+  conversationId         String?               @map("conversation_id")
+  conversation           SupportConversation?  @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  internalConversationId String?               @map("internal_conversation_id")
+  internalConversation   InternalConversation? @relation(fields: [internalConversationId], references: [id], onDelete: SetNull)
+  provider               String                @default("LEGACY") @map("provider")
 
   mappingType String @default("AUTO") @map("mapping_type") // AUTO, MANUAL, FALLBACK
   metadata    Json?  @default("{}") @map("metadata")
@@ -220,16 +224,19 @@ model ConversationMapping {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([channel, externalId, eventId], name: "uq_conversation_mapping")
+  @@unique([tenantId, channel, externalId, eventId], name: "uq_conversation_mapping")
   @@index([channel, externalId])
   @@index([conversationId])
+  @@index([internalConversationId])
   @@index([eventId])
+  @@index([tenantId, eventId])
   @@map("conversation_mapping")
 }
 
 model SupportConversation {
   id String @id @default(uuid())
 
+  tenantId     String? @map("tenant_id") @db.Uuid
   eventId      String  @map("event_id")
   invitationId String? @map("invitation_id")
 
@@ -286,6 +293,7 @@ model SupportConversation {
   @@index([assignedTo])
   @@index([status])
   @@index([eventId, status])
+  @@index([tenantId, eventId, status])
   @@index([assignedTo, status])
   @@index([createdAt])
   @@index([emailMessageId])
@@ -311,7 +319,12 @@ model SupportMessage {
 
   status     MessageStatus @default(SENT) @map("status")
   externalId String?       @map("external_id")
+  provider   String?       @map("provider")
   error      String?
+
+  emailMessageId  String? @map("email_message_id")
+  emailInReplyTo  String? @map("email_in_reply_to")
+  emailReferences String? @map("email_references")
 
   // Delivery tracking
   deliveredAt DateTime? @map("delivered_at")
@@ -329,6 +342,7 @@ model SupportMessage {
   deliveries MessageDelivery[]
 
   @@unique([conversationId, externalId], name: "uq_support_message_external")
+  @@unique([provider, externalId], name: "uq_support_message_provider_external")
   @@index([conversationId])
   @@index([createdAt])
   @@index([deletedAt])
@@ -412,7 +426,9 @@ enum InternalMessagePriority {
 model InternalConversation {
   id String @id @default(uuid())
 
-  eventId String @map("event_id")
+  tenantId String?             @map("tenant_id") @db.Uuid
+  eventId  String              @map("event_id")
+  channel  ConversationChannel @default(WEBCHAT) @map("channel")
 
   title           String                   @map("title")
   description     String?                  @map("description")
@@ -429,11 +445,13 @@ model InternalConversation {
 
   messages     InternalMessage[]
   participants InternalParticipant[]
+  mappings     ConversationMapping[]
 
-  @@unique([eventId, type, participantHash], name: "uq_internal_conversation")
+  @@unique([tenantId, eventId, channel, type, participantHash], name: "uq_internal_conversation")
   @@index([eventId])
   @@index([type])
   @@index([eventId, type])
+  @@index([tenantId, eventId, type])
   @@index([roleId])
   @@map("internal_conversation")
 }
@@ -446,12 +464,22 @@ model InternalMessage {
 
   senderId String @map("sender_id") @db.Uuid
 
+  direction  MessageDirection    @default(OUTBOUND) @map("direction")
+  channel    ConversationChannel @default(WEBCHAT) @map("channel")
+  provider   String?             @map("provider")
+  externalId String?             @map("external_id")
+
   body     String                  @map("body")
   priority InternalMessagePriority @default(NORMAL) @map("priority")
 
   createdAt DateTime  @default(now()) @map("created_at")
   editedAt  DateTime? @map("edited_at")
 
+  emailMessageId  String? @map("email_message_id")
+  emailInReplyTo  String? @map("email_in_reply_to")
+  emailReferences String? @map("email_references")
+
+  @@unique([provider, externalId], name: "uq_internal_message_provider_external")
   @@index([conversationId])
   @@index([senderId])
   @@index([createdAt])
@@ -487,6 +515,18 @@ model EventAccessProjection {
   @@unique([eventId, userId], name: "uq_event_access_projection")
   @@index([eventId], name: "idx_event_access_projection_event")
   @@map("event_access_projection")
+}
+
+model UserContactProjection {
+  userId       String   @id @map("user_id") @db.Uuid
+  email        String?  @map("email")
+  primaryPhone String?  @map("primary_phone")
+  displayName  String?  @map("display_name")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([primaryPhone])
+  @@map("user_contact_projection")
 }
 
 ////////////////////////////////

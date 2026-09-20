@@ -1,28 +1,32 @@
-import { env } from '../../../../config/env.js';
 import { DispatchService } from '../../../../modules/messages/services/dispatch.service.js';
 import {
   ConversationAccessDeniedException,
   ConversationNotFoundException,
   ConversationClosedException,
 } from '../../../../modules/notification/errors/notification.error.js';
-import type { SupportConversation, SupportMessage } from '../../../../prisma/generated/client.js';
+import type {
+  InternalMessage,
+  SupportConversation,
+  SupportMessage,
+} from '../../../../prisma/generated/client.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { TenantRouteService } from '../../common/tenant-route.service.js';
 import { MappingService, normalizeSupportExternalId } from '../mapping/mapping.service.js';
-import { Injectable } from '@nestjs/common';
+import { ConversationOutboxService } from '../outbox/conversation-outbox.service.js';
+import { toApiChannel } from '../../../internal/entities/internal-conversation.entity.js';
+import type { InternalConversationChannel } from '../../../internal/entities/internal-conversation.entity.js';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache-ts';
 import { EventPermissionKey } from '@omnixys/contracts-ts';
 import type {
-  ConversationChannel,
   SupportMessageReceivedDTO,
   EmailOutboundDTO,
-  ConversationChannelMessageDTO,
+  InternalMessageSentDTO,
 } from '@omnixys/contracts-ts';
 import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka-ts';
 import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger-ts';
 import { EventPermissionResolver } from '@omnixys/security-ts';
 import type { CurrentUserData } from '@omnixys/security-ts';
-
-const { DEFAULT_TENANT_ID } = env;
 
 @Injectable()
 export class MessageService {
@@ -36,6 +40,10 @@ export class MessageService {
     private readonly permissionResolver: EventPermissionResolver,
     private readonly mappings: MappingService,
     omnixysLogger: OmnixysLogger,
+    private readonly tenantRoutes: TenantRouteService = new TenantRouteService(),
+    @Optional()
+    @Inject(ConversationOutboxService)
+    private readonly outbox?: ConversationOutboxService,
   ) {
     this.logger = omnixysLogger.log(MessageService.name, 'service:notification');
   }
@@ -45,8 +53,9 @@ export class MessageService {
     user: CurrentUserData,
     limit = 100,
   ): Promise<SupportMessage[]> {
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id: conversationId },
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
+    const conversation = await this.prisma.supportConversation.findFirst({
+      where: { id: conversationId, tenantId },
     });
 
     if (!conversation) {
@@ -74,8 +83,9 @@ export class MessageService {
     invitationId: string,
     limit = 100,
   ): Promise<SupportMessage[]> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     const conversation = await this.prisma.supportConversation.findFirst({
-      where: { eventId, invitationId },
+      where: { eventId, tenantId, invitationId },
     });
 
     if (!conversation) {
@@ -98,8 +108,9 @@ export class MessageService {
     },
     user: CurrentUserData,
   ): Promise<SupportMessage> {
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id: conversationId },
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
+    const conversation = await this.prisma.supportConversation.findFirst({
+      where: { id: conversationId, tenantId },
     });
 
     if (!conversation) {
@@ -137,8 +148,9 @@ export class MessageService {
       mimeType?: string;
     },
   ): Promise<SupportMessage> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     const conversation = await this.prisma.supportConversation.findFirst({
-      where: { eventId, invitationId },
+      where: { eventId, tenantId, invitationId },
     });
 
     if (!conversation) {
@@ -164,8 +176,10 @@ export class MessageService {
       throw new ConversationClosedException(conversationId);
     }
 
-    const [message, updatedConversation] = await this.prisma.$transaction([
-      this.prisma.supportMessage.create({
+    const tenantId =
+      conversation.tenantId ?? this.tenantRoutes.requireEventTenant(conversation.eventId);
+    const { message, updatedConversation } = await this.prisma.$transaction(async (tx) => {
+      const message = await tx.supportMessage.create({
         data: {
           conversationId,
           direction: fromGuest ? 'INBOUND' : 'OUTBOUND',
@@ -177,8 +191,8 @@ export class MessageService {
           mimeType: data.mimeType,
           status: 'SENT',
         },
-      }),
-      this.prisma.supportConversation.update({
+      });
+      const updatedConversation = await tx.supportConversation.update({
         where: { id: conversationId },
         data: {
           lastMessageAt: new Date(),
@@ -187,8 +201,83 @@ export class MessageService {
             ? { unreadCount: { increment: 1 } }
             : { guestUnreadCount: { increment: 1 } }),
         },
-      }),
-    ]);
+      });
+      const payload = {
+        id: message.id,
+        conversationId: message.conversationId,
+        direction: message.direction,
+        channel: message.channel,
+        fromUserId: message.fromUserId ?? undefined,
+        fromGuest: message.fromGuest,
+        body: message.body ?? undefined,
+        mediaUrl: message.mediaUrl ?? undefined,
+        mimeType: message.mimeType ?? undefined,
+        status: message.status,
+        createdAt: message.createdAt.toISOString(),
+      } satisfies SupportMessageReceivedDTO;
+      const eventTopic = fromGuest
+        ? KafkaTopics.conversation.guestReplied
+        : KafkaTopics.conversation.agentReplied;
+      if (this.outbox) {
+        await this.outbox.enqueue(tx, {
+          topic: eventTopic,
+          payload,
+          tenantId,
+          key: conversationId,
+          actorId: actor.actorId,
+          operation: fromGuest ? 'Guest Replied' : 'Agent Replied',
+        });
+      } else {
+        await this.kafka.send({
+          topic: eventTopic,
+          payload,
+          meta: {
+            type: 'EVENT',
+            service: 'support-message-service',
+            operation: fromGuest ? 'Guest Replied' : 'Agent Replied',
+            actorId: actor.actorId,
+            tenantId,
+          },
+        });
+      }
+      if (conversation.channel === 'EMAIL' && !fromGuest) {
+        const emailPayload = {
+          to: conversation.guestContact ?? '',
+          subject: conversation.subject ? `Re: ${conversation.subject}` : 'Support Reply',
+          body: data.body ?? '',
+          inReplyTo: conversation.emailMessageId ?? undefined,
+          references: [conversation.emailReferences ?? conversation.emailMessageId]
+            .filter(Boolean)
+            .join(' '),
+          conversationId,
+          messageId: message.id,
+        } satisfies EmailOutboundDTO;
+        if (this.outbox) {
+          await this.outbox.enqueue(tx, {
+            topic: KafkaTopics.email.outboundSend,
+            payload: emailPayload,
+            tenantId,
+            key: conversationId,
+            actorId: actor.actorId,
+            type: 'COMMAND',
+            operation: 'Outbound Email Message',
+          });
+        } else {
+          await this.kafka.send({
+            topic: KafkaTopics.email.outboundSend,
+            payload: emailPayload,
+            meta: {
+              type: 'COMMAND',
+              service: 'support-message-service',
+              operation: 'Outbound Email Message',
+              actorId: actor.actorId,
+              tenantId,
+            },
+          });
+        }
+      }
+      return { message, updatedConversation };
+    });
 
     const conversationUnreadCount = updatedConversation.unreadCount;
     const guestUnreadCount = updatedConversation.guestUnreadCount;
@@ -241,60 +330,8 @@ export class MessageService {
       }
     }
 
-    await this.kafka.send({
-      topic: fromGuest
-        ? KafkaTopics.conversation.guestReplied
-        : KafkaTopics.conversation.agentReplied,
-      payload: {
-        id: message.id,
-        conversationId: message.conversationId,
-        direction: message.direction,
-        channel: message.channel,
-        fromUserId: message.fromUserId ?? undefined,
-        fromGuest: message.fromGuest,
-        body: message.body ?? undefined,
-        mediaUrl: message.mediaUrl ?? undefined,
-        mimeType: message.mimeType ?? undefined,
-        status: message.status,
-        createdAt: message.createdAt.toISOString(),
-      } satisfies SupportMessageReceivedDTO,
-      meta: {
-        clazz: this.constructor.name,
-        type: 'EVENT',
-        service: 'support-message-service',
-        operation: fromGuest ? 'Guest Replied' : 'Agent Replied',
-        version: '1',
-        actorId: actor.actorId,
-        tenantId: DEFAULT_TENANT_ID,
-      },
-    });
-
     // ── Channel-specific outbound routing ──
-    if (conversation.channel === 'EMAIL' && !fromGuest) {
-      await this.kafka.send({
-        topic: KafkaTopics.email.outboundSend,
-        payload: {
-          to: conversation.guestContact ?? '',
-          subject: conversation.subject ? `Re: ${conversation.subject}` : 'Support Reply',
-          body: data.body ?? '',
-          inReplyTo: conversation.emailMessageId ?? undefined,
-          references: [conversation.emailReferences ?? conversation.emailMessageId]
-            .filter(Boolean)
-            .join(' '),
-          conversationId,
-          messageId: message.id,
-        } satisfies EmailOutboundDTO,
-        meta: {
-          clazz: this.constructor.name,
-          type: 'COMMAND',
-          service: 'support-message-service',
-          operation: 'Outbound Email Message',
-          version: '1',
-          actorId: actor.actorId,
-          tenantId: DEFAULT_TENANT_ID,
-        },
-      });
-    } else if (conversation.channel === 'WHATSAPP' && !fromGuest) {
+    if (conversation.channel === 'WHATSAPP' && !fromGuest) {
       const recipient = conversation.guestContact ?? '';
 
       const dispatchResult = await this.dispatchService.dispatch({
@@ -327,26 +364,6 @@ export class MessageService {
           dispatchResult.error,
         );
       }
-
-      await this.kafka.send({
-        topic: KafkaTopics.conversation.channelMessage,
-        payload: {
-          conversationId,
-          channel: conversation.channel as ConversationChannel,
-          to: recipient,
-          body: data.body ?? '',
-          externalId: message.id,
-        } satisfies ConversationChannelMessageDTO,
-        meta: {
-          clazz: this.constructor.name,
-          type: 'COMMAND',
-          service: 'support-message-service',
-          operation: 'Outbound Channel Message',
-          version: '1',
-          actorId: actor.actorId,
-          tenantId: DEFAULT_TENANT_ID,
-        },
-      });
     }
 
     return message;
@@ -354,19 +371,36 @@ export class MessageService {
 
   async receiveInboundMessage(data: {
     externalId: string;
+    tenantId: string;
     eventId: string;
     from: string;
     senderName?: string;
     body?: string;
     mediaUrl?: string;
     mimeType?: string;
-  }): Promise<SupportMessage | null> {
+  }): Promise<SupportMessage | InternalMessage | null> {
     const canonicalFrom = normalizeSupportExternalId(data.from);
     const mapping = await this.mappings.resolveUniqueInboundMapping(
       'WHATSAPP',
       canonicalFrom,
       data.eventId,
+      data.tenantId,
     );
+
+    if (mapping.internalConversationId) {
+      return this.receiveInternalWhatsAppMessage(
+        mapping.internalConversationId,
+        data,
+        canonicalFrom,
+      );
+    }
+
+    if (!mapping.conversationId) {
+      const staff = await this.resolveEventStaffByPhone(data.eventId, canonicalFrom);
+      if (staff) {
+        return this.createInternalWhatsAppConversation(data, canonicalFrom, staff);
+      }
+    }
 
     let message: SupportMessage;
     let conversation: SupportConversation;
@@ -388,14 +422,15 @@ export class MessageService {
       });
       if (
         mappedConversation?.eventId !== data.eventId ||
+        mappedConversation?.tenantId !== data.tenantId ||
         mappedConversation?.status === 'CLOSED' ||
         mappedConversation?.deletedAt
       ) {
         return null;
       }
 
-      const [createdMessage, updatedConversation] = await this.prisma.$transaction([
-        this.prisma.supportMessage.create({
+      const { createdMessage, updatedConversation } = await this.prisma.$transaction(async (tx) => {
+        const createdMessage = await tx.supportMessage.create({
           data: {
             conversationId: mappedConversation.id,
             direction: 'INBOUND',
@@ -406,17 +441,25 @@ export class MessageService {
             mimeType: data.mimeType,
             status: 'DELIVERED',
             externalId: data.externalId,
+            provider: 'EVOLUTION',
           },
-        }),
-        this.prisma.supportConversation.update({
+        });
+        const updatedConversation = await tx.supportConversation.update({
           where: { id: mappedConversation.id },
           data: {
             lastMessageAt: new Date(),
             lastMessagePreview: (data.body ?? '(media)').slice(0, 100),
             unreadCount: { increment: 1 },
           },
-        }),
-      ]);
+        });
+        await this.enqueueSupportMessageEvent(
+          tx,
+          createdMessage,
+          data.tenantId,
+          'WhatsApp Guest Replied',
+        );
+        return { createdMessage, updatedConversation };
+      });
       message = createdMessage;
       conversation = mappedConversation;
       unreadCount = updatedConversation.unreadCount;
@@ -425,6 +468,7 @@ export class MessageService {
       const created = await this.prisma.$transaction(async (tx) => {
         const createdConversation = await tx.supportConversation.create({
           data: {
+            tenantId: data.tenantId,
             eventId: data.eventId,
             guestName: senderName?.length ? senderName : canonicalFrom,
             guestContact: canonicalFrom,
@@ -438,11 +482,13 @@ export class MessageService {
         });
         await tx.conversationMapping.create({
           data: {
+            tenantId: data.tenantId,
             channel: 'WHATSAPP',
             externalId: canonicalFrom,
             eventId: data.eventId,
             conversationId: createdConversation.id,
             mappingType: 'AUTO',
+            provider: 'EVOLUTION',
           },
         });
         const createdMessage = await tx.supportMessage.create({
@@ -456,8 +502,15 @@ export class MessageService {
             mimeType: data.mimeType,
             status: 'DELIVERED',
             externalId: data.externalId,
+            provider: 'EVOLUTION',
           },
         });
+        await this.enqueueSupportMessageEvent(
+          tx,
+          createdMessage,
+          data.tenantId,
+          'WhatsApp Guest Replied',
+        );
         return { conversation: createdConversation, message: createdMessage };
       });
       message = created.message;
@@ -480,30 +533,6 @@ export class MessageService {
       });
     }
 
-    await this.kafka.send({
-      topic: KafkaTopics.conversation.guestReplied,
-      payload: {
-        id: message.id,
-        conversationId: message.conversationId,
-        direction: message.direction,
-        channel: message.channel,
-        fromGuest: true,
-        body: message.body ?? undefined,
-        mediaUrl: message.mediaUrl ?? undefined,
-        mimeType: message.mimeType ?? undefined,
-        status: message.status,
-        createdAt: message.createdAt.toISOString(),
-      } satisfies SupportMessageReceivedDTO,
-      meta: {
-        clazz: this.constructor.name,
-        type: 'EVENT',
-        service: 'support-message-service',
-        operation: 'WhatsApp Guest Replied',
-        version: '1',
-        tenantId: DEFAULT_TENANT_ID,
-      },
-    });
-
     return message;
   }
 
@@ -511,13 +540,276 @@ export class MessageService {
     externalId: string,
     from: string,
     eventId?: string,
-  ): Promise<SupportMessage | null> {
-    const mapping = await this.mappings.resolveUniqueInboundMapping('WHATSAPP', from, eventId);
-    if (!mapping.conversationId) {
+    tenantId?: string,
+  ): Promise<SupportMessage | InternalMessage | null> {
+    if (!eventId || !tenantId) {
       return null;
     }
+    const supportMessage = await this.prisma.supportMessage.findFirst({
+      where: {
+        provider: 'EVOLUTION',
+        externalId,
+        conversation: { eventId, tenantId },
+      },
+    });
+    if (supportMessage) {
+      return supportMessage;
+    }
+    const internalMessage = await this.prisma.internalMessage.findFirst({
+      where: {
+        provider: 'EVOLUTION',
+        externalId,
+        conversation: { eventId, tenantId },
+      },
+    });
+    if (internalMessage) {
+      return internalMessage;
+    }
+    const mapping = await this.mappings.resolveUniqueInboundMapping(
+      'WHATSAPP',
+      from,
+      eventId,
+      tenantId,
+    );
+    if (!mapping.conversationId) {
+      return mapping.internalConversationId
+        ? this.prisma.internalMessage.findFirst({
+            where: {
+              conversationId: mapping.internalConversationId,
+              externalId,
+              provider: 'EVOLUTION',
+            },
+          })
+        : null;
+    }
     return this.prisma.supportMessage.findFirst({
-      where: { conversationId: mapping.conversationId, externalId },
+      where: {
+        conversationId: mapping.conversationId,
+        externalId,
+        conversation: tenantId ? { tenantId } : undefined,
+      },
+    });
+  }
+
+  private async receiveInternalWhatsAppMessage(
+    conversationId: string,
+    data: {
+      externalId: string;
+      tenantId: string;
+      eventId: string;
+      senderName?: string;
+      body?: string;
+    },
+    canonicalFrom: string,
+  ): Promise<InternalMessage | null> {
+    const conversation = await this.prisma.internalConversation.findFirst({
+      where: { id: conversationId, tenantId: data.tenantId, eventId: data.eventId, isActive: true },
+      include: { participants: { where: { leftAt: null }, select: { userId: true } } },
+    });
+    if (!conversation) {
+      return null;
+    }
+    const senderId = conversation.participants[0]?.userId;
+    if (!senderId) {
+      return null;
+    }
+    const message = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.internalMessage.create({
+        data: {
+          conversationId,
+          senderId,
+          body: data.body ?? '',
+          direction: 'INBOUND',
+          channel: 'WHATSAPP',
+          provider: 'EVOLUTION',
+          externalId: data.externalId,
+        },
+      });
+      await this.enqueueInternalMessageEvent(
+        tx,
+        created,
+        conversation.participants.map(({ userId }) => userId),
+        data.tenantId,
+      );
+      return created;
+    });
+    this.logger.debug('Routed WhatsApp inbound to internal conversation: %o', {
+      conversationId,
+      sender: canonicalFrom,
+    });
+    return message;
+  }
+
+  private async resolveEventStaffByPhone(
+    eventId: string,
+    canonicalPhone: string,
+  ): Promise<{ userId: string; displayName: string | null } | null> {
+    const eventUsers = await this.prisma.eventAccessProjection.findMany({
+      where: { eventId },
+      select: { userId: true },
+    });
+    if (eventUsers.length === 0) {
+      return null;
+    }
+    return this.prisma.userContactProjection.findFirst({
+      where: {
+        userId: { in: eventUsers.map(({ userId }) => userId) },
+        primaryPhone: canonicalPhone,
+      },
+      select: { userId: true, displayName: true },
+    });
+  }
+
+  private async createInternalWhatsAppConversation(
+    data: {
+      externalId: string;
+      tenantId: string;
+      eventId: string;
+      senderName?: string;
+      body?: string;
+    },
+    canonicalFrom: string,
+    staff: { userId: string; displayName: string | null },
+  ): Promise<InternalMessage> {
+    const participantHash = staff.userId;
+    const result = await this.prisma.$transaction(async (tx) => {
+      const conversation = await tx.internalConversation.upsert({
+        where: {
+          uq_internal_conversation: {
+            tenantId: data.tenantId,
+            eventId: data.eventId,
+            channel: 'WHATSAPP',
+            type: 'DIRECT',
+            participantHash,
+          },
+        },
+        create: {
+          tenantId: data.tenantId,
+          eventId: data.eventId,
+          channel: 'WHATSAPP',
+          title: staff.displayName || data.senderName?.trim() || canonicalFrom,
+          type: 'DIRECT',
+          participantHash,
+          createdBy: staff.userId,
+        },
+        update: { isActive: true, archivedAt: null },
+      });
+      await tx.internalParticipant.upsert({
+        where: {
+          uq_internal_participant: { conversationId: conversation.id, userId: staff.userId },
+        },
+        create: { conversationId: conversation.id, userId: staff.userId },
+        update: { leftAt: null },
+      });
+      await tx.conversationMapping.upsert({
+        where: {
+          uq_conversation_mapping: {
+            tenantId: data.tenantId,
+            channel: 'WHATSAPP',
+            externalId: canonicalFrom,
+            eventId: data.eventId,
+          },
+        },
+        create: {
+          tenantId: data.tenantId,
+          channel: 'WHATSAPP',
+          externalId: canonicalFrom,
+          eventId: data.eventId,
+          internalConversationId: conversation.id,
+          provider: 'EVOLUTION',
+        },
+        update: {
+          conversationId: null,
+          internalConversationId: conversation.id,
+          provider: 'EVOLUTION',
+        },
+      });
+      const message = await tx.internalMessage.create({
+        data: {
+          conversationId: conversation.id,
+          senderId: staff.userId,
+          body: data.body ?? '',
+          direction: 'INBOUND',
+          channel: 'WHATSAPP',
+          provider: 'EVOLUTION',
+          externalId: data.externalId,
+        },
+      });
+      await this.enqueueInternalMessageEvent(tx, message, [staff.userId], data.tenantId);
+      return { conversation, message };
+    });
+    return result.message;
+  }
+
+  private enqueueSupportMessageEvent(
+    tx: Parameters<ConversationOutboxService['enqueue']>[0],
+    message: SupportMessage,
+    tenantId: string,
+    operation: string,
+  ): Promise<unknown> {
+    const payload = {
+      id: message.id,
+      conversationId: message.conversationId,
+      direction: message.direction,
+      channel: message.channel,
+      fromUserId: message.fromUserId ?? undefined,
+      fromGuest: message.fromGuest,
+      body: message.body ?? undefined,
+      mediaUrl: message.mediaUrl ?? undefined,
+      mimeType: message.mimeType ?? undefined,
+      status: message.status,
+      createdAt: message.createdAt.toISOString(),
+    } satisfies SupportMessageReceivedDTO;
+    if (this.outbox) {
+      return this.outbox.enqueue(tx, {
+        topic: KafkaTopics.conversation.guestReplied,
+        payload,
+        tenantId,
+        key: message.conversationId,
+        operation,
+      });
+    }
+    return this.kafka.send({
+      topic: KafkaTopics.conversation.guestReplied,
+      payload,
+      meta: { type: 'EVENT', service: 'support-message-service', operation, tenantId },
+    });
+  }
+
+private enqueueInternalMessageEvent(
+    tx: Parameters<ConversationOutboxService['enqueue']>[0],
+    message: InternalMessage,
+    participantIds: string[],
+    tenantId: string,
+  ): Promise<unknown> {
+    const payload: InternalMessageSentDTO & { channel: InternalConversationChannel } = {
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      channel: toApiChannel(message.channel),
+      body: message.body,
+      priority: message.priority,
+      createdAt: message.createdAt.toISOString(),
+      participantIds,
+    };
+    if (this.outbox) {
+      return this.outbox.enqueue(tx, {
+        topic: KafkaTopics.conversation.internalMessage,
+        payload,
+        tenantId,
+        key: message.conversationId,
+        operation: 'External Staff Message Received',
+      });
+    }
+    return this.kafka.send({
+      topic: KafkaTopics.conversation.internalMessage,
+      payload,
+      meta: {
+        type: 'EVENT',
+        service: 'support-message-service',
+        operation: 'External Staff Message Received',
+        tenantId,
+      },
     });
   }
 

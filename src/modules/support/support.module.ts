@@ -8,10 +8,12 @@ import { QuickReplyModule } from './modules/quick-reply/quick-reply.module.js';
 import { WorkflowModule } from './modules/workflow/workflow.module.js';
 import { SupportRsvpModule } from './rsvp/support-rsvp.module.js';
 import { SupportAccessController, SupportInboundController } from './support-access.controller.js';
+import { TenantRouteBackfillService } from './tenant-route-backfill.service.js';
 import { Module } from '@nestjs/common';
 
 @Module({
   controllers: [SupportAccessController, SupportInboundController],
+  providers: [TenantRouteBackfillService],
   imports: [
     ConversationModule,
     MappingModule,

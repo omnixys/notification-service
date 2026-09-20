@@ -21,6 +21,8 @@ import { BannerService } from './config/banner.service.js';
 import { env } from './config/env.js';
 import { HandlerModule } from './handlers/handler.module.js';
 import { HealthModule } from './health/health.module.js';
+import { EmailModule } from './modules/email/email.module.js';
+import { InternalModule } from './modules/internal/internal.module.js';
 import { NotificationModule } from './modules/notification/notification.module.js';
 import { SupportModule } from './modules/support/support.module.js';
 import { Module } from '@nestjs/common';
@@ -163,6 +165,8 @@ const {
     HealthModule,
     NotificationModule,
     SupportModule,
+    InternalModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [BannerService],

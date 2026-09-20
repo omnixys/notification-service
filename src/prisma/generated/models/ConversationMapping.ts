@@ -26,10 +26,13 @@ export type AggregateConversationMapping = {
 
 export type ConversationMappingMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   channel: $Enums.ConversationChannel | null
   externalId: string | null
   eventId: string | null
   conversationId: string | null
+  internalConversationId: string | null
+  provider: string | null
   mappingType: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -37,10 +40,13 @@ export type ConversationMappingMinAggregateOutputType = {
 
 export type ConversationMappingMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   channel: $Enums.ConversationChannel | null
   externalId: string | null
   eventId: string | null
   conversationId: string | null
+  internalConversationId: string | null
+  provider: string | null
   mappingType: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -48,10 +54,13 @@ export type ConversationMappingMaxAggregateOutputType = {
 
 export type ConversationMappingCountAggregateOutputType = {
   id: number
+  tenantId: number
   channel: number
   externalId: number
   eventId: number
   conversationId: number
+  internalConversationId: number
+  provider: number
   mappingType: number
   metadata: number
   createdAt: number
@@ -62,10 +71,13 @@ export type ConversationMappingCountAggregateOutputType = {
 
 export type ConversationMappingMinAggregateInputType = {
   id?: true
+  tenantId?: true
   channel?: true
   externalId?: true
   eventId?: true
   conversationId?: true
+  internalConversationId?: true
+  provider?: true
   mappingType?: true
   createdAt?: true
   updatedAt?: true
@@ -73,10 +85,13 @@ export type ConversationMappingMinAggregateInputType = {
 
 export type ConversationMappingMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   channel?: true
   externalId?: true
   eventId?: true
   conversationId?: true
+  internalConversationId?: true
+  provider?: true
   mappingType?: true
   createdAt?: true
   updatedAt?: true
@@ -84,10 +99,13 @@ export type ConversationMappingMaxAggregateInputType = {
 
 export type ConversationMappingCountAggregateInputType = {
   id?: true
+  tenantId?: true
   channel?: true
   externalId?: true
   eventId?: true
   conversationId?: true
+  internalConversationId?: true
+  provider?: true
   mappingType?: true
   metadata?: true
   createdAt?: true
@@ -169,10 +187,13 @@ export type ConversationMappingGroupByArgs<ExtArgs extends runtime.Types.Extensi
 
 export type ConversationMappingGroupByOutputType = {
   id: string
+  tenantId: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId: string | null
   conversationId: string | null
+  internalConversationId: string | null
+  provider: string
   mappingType: string
   metadata: runtime.JsonValue | null
   createdAt: Date
@@ -202,28 +223,36 @@ export type ConversationMappingWhereInput = {
   OR?: Prisma.ConversationMappingWhereInput[]
   NOT?: Prisma.ConversationMappingWhereInput | Prisma.ConversationMappingWhereInput[]
   id?: Prisma.StringFilter<"ConversationMapping"> | string
+  tenantId?: Prisma.UuidNullableFilter<"ConversationMapping"> | string | null
   channel?: Prisma.EnumConversationChannelFilter<"ConversationMapping"> | $Enums.ConversationChannel
   externalId?: Prisma.StringFilter<"ConversationMapping"> | string
   eventId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
   conversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  internalConversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  provider?: Prisma.StringFilter<"ConversationMapping"> | string
   mappingType?: Prisma.StringFilter<"ConversationMapping"> | string
   metadata?: Prisma.JsonNullableFilter<"ConversationMapping">
   createdAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
   conversation?: Prisma.XOR<Prisma.SupportConversationNullableScalarRelationFilter, Prisma.SupportConversationWhereInput> | null
+  internalConversation?: Prisma.XOR<Prisma.InternalConversationNullableScalarRelationFilter, Prisma.InternalConversationWhereInput> | null
 }
 
 export type ConversationMappingOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   eventId?: Prisma.SortOrderInput | Prisma.SortOrder
   conversationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  internalConversationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  provider?: Prisma.SortOrder
   mappingType?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   conversation?: Prisma.SupportConversationOrderByWithRelationInput
+  internalConversation?: Prisma.InternalConversationOrderByWithRelationInput
 }
 
 export type ConversationMappingWhereUniqueInput = Prisma.AtLeast<{
@@ -232,23 +261,30 @@ export type ConversationMappingWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ConversationMappingWhereInput | Prisma.ConversationMappingWhereInput[]
   OR?: Prisma.ConversationMappingWhereInput[]
   NOT?: Prisma.ConversationMappingWhereInput | Prisma.ConversationMappingWhereInput[]
+  tenantId?: Prisma.UuidNullableFilter<"ConversationMapping"> | string | null
   channel?: Prisma.EnumConversationChannelFilter<"ConversationMapping"> | $Enums.ConversationChannel
   externalId?: Prisma.StringFilter<"ConversationMapping"> | string
   eventId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
   conversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  internalConversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  provider?: Prisma.StringFilter<"ConversationMapping"> | string
   mappingType?: Prisma.StringFilter<"ConversationMapping"> | string
   metadata?: Prisma.JsonNullableFilter<"ConversationMapping">
   createdAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
   conversation?: Prisma.XOR<Prisma.SupportConversationNullableScalarRelationFilter, Prisma.SupportConversationWhereInput> | null
+  internalConversation?: Prisma.XOR<Prisma.InternalConversationNullableScalarRelationFilter, Prisma.InternalConversationWhereInput> | null
 }, "id" | "uq_conversation_mapping">
 
 export type ConversationMappingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   eventId?: Prisma.SortOrderInput | Prisma.SortOrder
   conversationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  internalConversationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  provider?: Prisma.SortOrder
   mappingType?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -263,10 +299,13 @@ export type ConversationMappingScalarWhereWithAggregatesInput = {
   OR?: Prisma.ConversationMappingScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ConversationMappingScalarWhereWithAggregatesInput | Prisma.ConversationMappingScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ConversationMapping"> | string
+  tenantId?: Prisma.UuidNullableWithAggregatesFilter<"ConversationMapping"> | string | null
   channel?: Prisma.EnumConversationChannelWithAggregatesFilter<"ConversationMapping"> | $Enums.ConversationChannel
   externalId?: Prisma.StringWithAggregatesFilter<"ConversationMapping"> | string
   eventId?: Prisma.StringNullableWithAggregatesFilter<"ConversationMapping"> | string | null
   conversationId?: Prisma.StringNullableWithAggregatesFilter<"ConversationMapping"> | string | null
+  internalConversationId?: Prisma.StringNullableWithAggregatesFilter<"ConversationMapping"> | string | null
+  provider?: Prisma.StringWithAggregatesFilter<"ConversationMapping"> | string
   mappingType?: Prisma.StringWithAggregatesFilter<"ConversationMapping"> | string
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"ConversationMapping">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConversationMapping"> | Date | string
@@ -275,22 +314,28 @@ export type ConversationMappingScalarWhereWithAggregatesInput = {
 
 export type ConversationMappingCreateInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   conversation?: Prisma.SupportConversationCreateNestedOneWithoutMappingsInput
+  internalConversation?: Prisma.InternalConversationCreateNestedOneWithoutMappingsInput
 }
 
 export type ConversationMappingUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
   conversationId?: string | null
+  internalConversationId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -299,22 +344,28 @@ export type ConversationMappingUncheckedCreateInput = {
 
 export type ConversationMappingUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.SupportConversationUpdateOneWithoutMappingsNestedInput
+  internalConversation?: Prisma.InternalConversationUpdateOneWithoutMappingsNestedInput
 }
 
 export type ConversationMappingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  internalConversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -323,10 +374,13 @@ export type ConversationMappingUncheckedUpdateInput = {
 
 export type ConversationMappingCreateManyInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
   conversationId?: string | null
+  internalConversationId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -335,9 +389,11 @@ export type ConversationMappingCreateManyInput = {
 
 export type ConversationMappingUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -346,10 +402,13 @@ export type ConversationMappingUpdateManyMutationInput = {
 
 export type ConversationMappingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  internalConversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -357,6 +416,7 @@ export type ConversationMappingUncheckedUpdateManyInput = {
 }
 
 export type ConversationMappingUq_conversation_mappingCompoundUniqueInput = {
+  tenantId: string
   channel: $Enums.ConversationChannel
   externalId: string
   eventId: string
@@ -364,10 +424,13 @@ export type ConversationMappingUq_conversation_mappingCompoundUniqueInput = {
 
 export type ConversationMappingCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
+  internalConversationId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   mappingType?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -376,10 +439,13 @@ export type ConversationMappingCountOrderByAggregateInput = {
 
 export type ConversationMappingMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
+  internalConversationId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   mappingType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -387,10 +453,13 @@ export type ConversationMappingMaxOrderByAggregateInput = {
 
 export type ConversationMappingMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
+  internalConversationId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   mappingType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -452,22 +521,70 @@ export type ConversationMappingUncheckedUpdateManyWithoutConversationNestedInput
   deleteMany?: Prisma.ConversationMappingScalarWhereInput | Prisma.ConversationMappingScalarWhereInput[]
 }
 
+export type ConversationMappingCreateNestedManyWithoutInternalConversationInput = {
+  create?: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput> | Prisma.ConversationMappingCreateWithoutInternalConversationInput[] | Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput[]
+  connectOrCreate?: Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput | Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput[]
+  createMany?: Prisma.ConversationMappingCreateManyInternalConversationInputEnvelope
+  connect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+}
+
+export type ConversationMappingUncheckedCreateNestedManyWithoutInternalConversationInput = {
+  create?: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput> | Prisma.ConversationMappingCreateWithoutInternalConversationInput[] | Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput[]
+  connectOrCreate?: Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput | Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput[]
+  createMany?: Prisma.ConversationMappingCreateManyInternalConversationInputEnvelope
+  connect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+}
+
+export type ConversationMappingUpdateManyWithoutInternalConversationNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput> | Prisma.ConversationMappingCreateWithoutInternalConversationInput[] | Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput[]
+  connectOrCreate?: Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput | Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput[]
+  upsert?: Prisma.ConversationMappingUpsertWithWhereUniqueWithoutInternalConversationInput | Prisma.ConversationMappingUpsertWithWhereUniqueWithoutInternalConversationInput[]
+  createMany?: Prisma.ConversationMappingCreateManyInternalConversationInputEnvelope
+  set?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  disconnect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  delete?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  connect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  update?: Prisma.ConversationMappingUpdateWithWhereUniqueWithoutInternalConversationInput | Prisma.ConversationMappingUpdateWithWhereUniqueWithoutInternalConversationInput[]
+  updateMany?: Prisma.ConversationMappingUpdateManyWithWhereWithoutInternalConversationInput | Prisma.ConversationMappingUpdateManyWithWhereWithoutInternalConversationInput[]
+  deleteMany?: Prisma.ConversationMappingScalarWhereInput | Prisma.ConversationMappingScalarWhereInput[]
+}
+
+export type ConversationMappingUncheckedUpdateManyWithoutInternalConversationNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput> | Prisma.ConversationMappingCreateWithoutInternalConversationInput[] | Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput[]
+  connectOrCreate?: Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput | Prisma.ConversationMappingCreateOrConnectWithoutInternalConversationInput[]
+  upsert?: Prisma.ConversationMappingUpsertWithWhereUniqueWithoutInternalConversationInput | Prisma.ConversationMappingUpsertWithWhereUniqueWithoutInternalConversationInput[]
+  createMany?: Prisma.ConversationMappingCreateManyInternalConversationInputEnvelope
+  set?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  disconnect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  delete?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  connect?: Prisma.ConversationMappingWhereUniqueInput | Prisma.ConversationMappingWhereUniqueInput[]
+  update?: Prisma.ConversationMappingUpdateWithWhereUniqueWithoutInternalConversationInput | Prisma.ConversationMappingUpdateWithWhereUniqueWithoutInternalConversationInput[]
+  updateMany?: Prisma.ConversationMappingUpdateManyWithWhereWithoutInternalConversationInput | Prisma.ConversationMappingUpdateManyWithWhereWithoutInternalConversationInput[]
+  deleteMany?: Prisma.ConversationMappingScalarWhereInput | Prisma.ConversationMappingScalarWhereInput[]
+}
+
 export type ConversationMappingCreateWithoutConversationInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  internalConversation?: Prisma.InternalConversationCreateNestedOneWithoutMappingsInput
 }
 
 export type ConversationMappingUncheckedCreateWithoutConversationInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
+  internalConversationId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -505,21 +622,81 @@ export type ConversationMappingScalarWhereInput = {
   OR?: Prisma.ConversationMappingScalarWhereInput[]
   NOT?: Prisma.ConversationMappingScalarWhereInput | Prisma.ConversationMappingScalarWhereInput[]
   id?: Prisma.StringFilter<"ConversationMapping"> | string
+  tenantId?: Prisma.UuidNullableFilter<"ConversationMapping"> | string | null
   channel?: Prisma.EnumConversationChannelFilter<"ConversationMapping"> | $Enums.ConversationChannel
   externalId?: Prisma.StringFilter<"ConversationMapping"> | string
   eventId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
   conversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  internalConversationId?: Prisma.StringNullableFilter<"ConversationMapping"> | string | null
+  provider?: Prisma.StringFilter<"ConversationMapping"> | string
   mappingType?: Prisma.StringFilter<"ConversationMapping"> | string
   metadata?: Prisma.JsonNullableFilter<"ConversationMapping">
   createdAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConversationMapping"> | Date | string
 }
 
-export type ConversationMappingCreateManyConversationInput = {
+export type ConversationMappingCreateWithoutInternalConversationInput = {
   id?: string
+  tenantId?: string | null
   channel: $Enums.ConversationChannel
   externalId: string
   eventId?: string | null
+  provider?: string
+  mappingType?: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversation?: Prisma.SupportConversationCreateNestedOneWithoutMappingsInput
+}
+
+export type ConversationMappingUncheckedCreateWithoutInternalConversationInput = {
+  id?: string
+  tenantId?: string | null
+  channel: $Enums.ConversationChannel
+  externalId: string
+  eventId?: string | null
+  conversationId?: string | null
+  provider?: string
+  mappingType?: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ConversationMappingCreateOrConnectWithoutInternalConversationInput = {
+  where: Prisma.ConversationMappingWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput>
+}
+
+export type ConversationMappingCreateManyInternalConversationInputEnvelope = {
+  data: Prisma.ConversationMappingCreateManyInternalConversationInput | Prisma.ConversationMappingCreateManyInternalConversationInput[]
+  skipDuplicates?: boolean
+}
+
+export type ConversationMappingUpsertWithWhereUniqueWithoutInternalConversationInput = {
+  where: Prisma.ConversationMappingWhereUniqueInput
+  update: Prisma.XOR<Prisma.ConversationMappingUpdateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedUpdateWithoutInternalConversationInput>
+  create: Prisma.XOR<Prisma.ConversationMappingCreateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedCreateWithoutInternalConversationInput>
+}
+
+export type ConversationMappingUpdateWithWhereUniqueWithoutInternalConversationInput = {
+  where: Prisma.ConversationMappingWhereUniqueInput
+  data: Prisma.XOR<Prisma.ConversationMappingUpdateWithoutInternalConversationInput, Prisma.ConversationMappingUncheckedUpdateWithoutInternalConversationInput>
+}
+
+export type ConversationMappingUpdateManyWithWhereWithoutInternalConversationInput = {
+  where: Prisma.ConversationMappingScalarWhereInput
+  data: Prisma.XOR<Prisma.ConversationMappingUpdateManyMutationInput, Prisma.ConversationMappingUncheckedUpdateManyWithoutInternalConversationInput>
+}
+
+export type ConversationMappingCreateManyConversationInput = {
+  id?: string
+  tenantId?: string | null
+  channel: $Enums.ConversationChannel
+  externalId: string
+  eventId?: string | null
+  internalConversationId?: string | null
+  provider?: string
   mappingType?: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -528,20 +705,26 @@ export type ConversationMappingCreateManyConversationInput = {
 
 export type ConversationMappingUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  internalConversation?: Prisma.InternalConversationUpdateOneWithoutMappingsNestedInput
 }
 
 export type ConversationMappingUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  internalConversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -550,9 +733,68 @@ export type ConversationMappingUncheckedUpdateWithoutConversationInput = {
 
 export type ConversationMappingUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  internalConversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingType?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ConversationMappingCreateManyInternalConversationInput = {
+  id?: string
+  tenantId?: string | null
+  channel: $Enums.ConversationChannel
+  externalId: string
+  eventId?: string | null
+  conversationId?: string | null
+  provider?: string
+  mappingType?: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ConversationMappingUpdateWithoutInternalConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingType?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversation?: Prisma.SupportConversationUpdateOneWithoutMappingsNestedInput
+}
+
+export type ConversationMappingUncheckedUpdateWithoutInternalConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingType?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ConversationMappingUncheckedUpdateManyWithoutInternalConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumConversationChannelFieldUpdateOperationsInput | $Enums.ConversationChannel
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   mappingType?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -563,77 +805,99 @@ export type ConversationMappingUncheckedUpdateManyWithoutConversationInput = {
 
 export type ConversationMappingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   channel?: boolean
   externalId?: boolean
   eventId?: boolean
   conversationId?: boolean
+  internalConversationId?: boolean
+  provider?: boolean
   mappingType?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMapping"]>
 
 export type ConversationMappingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   channel?: boolean
   externalId?: boolean
   eventId?: boolean
   conversationId?: boolean
+  internalConversationId?: boolean
+  provider?: boolean
   mappingType?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMapping"]>
 
 export type ConversationMappingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   channel?: boolean
   externalId?: boolean
   eventId?: boolean
   conversationId?: boolean
+  internalConversationId?: boolean
+  provider?: boolean
   mappingType?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMapping"]>
 
 export type ConversationMappingSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   channel?: boolean
   externalId?: boolean
   eventId?: boolean
   conversationId?: boolean
+  internalConversationId?: boolean
+  provider?: boolean
   mappingType?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConversationMappingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "channel" | "externalId" | "eventId" | "conversationId" | "mappingType" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["conversationMapping"]>
+export type ConversationMappingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "channel" | "externalId" | "eventId" | "conversationId" | "internalConversationId" | "provider" | "mappingType" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["conversationMapping"]>
 export type ConversationMappingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }
 export type ConversationMappingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }
 export type ConversationMappingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationMapping$conversationArgs<ExtArgs>
+  internalConversation?: boolean | Prisma.ConversationMapping$internalConversationArgs<ExtArgs>
 }
 
 export type $ConversationMappingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ConversationMapping"
   objects: {
     conversation: Prisma.$SupportConversationPayload<ExtArgs> | null
+    internalConversation: Prisma.$InternalConversationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     channel: $Enums.ConversationChannel
     externalId: string
     eventId: string | null
     conversationId: string | null
+    internalConversationId: string | null
+    provider: string
     mappingType: string
     metadata: runtime.JsonValue | null
     createdAt: Date
@@ -1033,6 +1297,7 @@ readonly fields: ConversationMappingFieldRefs;
 export interface Prisma__ConversationMappingClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   conversation<T extends Prisma.ConversationMapping$conversationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationMapping$conversationArgs<ExtArgs>>): Prisma.Prisma__SupportConversationClient<runtime.Types.Result.GetResult<Prisma.$SupportConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  internalConversation<T extends Prisma.ConversationMapping$internalConversationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationMapping$internalConversationArgs<ExtArgs>>): Prisma.Prisma__InternalConversationClient<runtime.Types.Result.GetResult<Prisma.$InternalConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1063,10 +1328,13 @@ export interface Prisma__ConversationMappingClient<T, Null = never, ExtArgs exte
  */
 export interface ConversationMappingFieldRefs {
   readonly id: Prisma.FieldRef<"ConversationMapping", 'String'>
+  readonly tenantId: Prisma.FieldRef<"ConversationMapping", 'String'>
   readonly channel: Prisma.FieldRef<"ConversationMapping", 'ConversationChannel'>
   readonly externalId: Prisma.FieldRef<"ConversationMapping", 'String'>
   readonly eventId: Prisma.FieldRef<"ConversationMapping", 'String'>
   readonly conversationId: Prisma.FieldRef<"ConversationMapping", 'String'>
+  readonly internalConversationId: Prisma.FieldRef<"ConversationMapping", 'String'>
+  readonly provider: Prisma.FieldRef<"ConversationMapping", 'String'>
   readonly mappingType: Prisma.FieldRef<"ConversationMapping", 'String'>
   readonly metadata: Prisma.FieldRef<"ConversationMapping", 'Json'>
   readonly createdAt: Prisma.FieldRef<"ConversationMapping", 'DateTime'>
@@ -1488,6 +1756,25 @@ export type ConversationMapping$conversationArgs<ExtArgs extends runtime.Types.E
    */
   include?: Prisma.SupportConversationInclude<ExtArgs> | null
   where?: Prisma.SupportConversationWhereInput
+}
+
+/**
+ * ConversationMapping.internalConversation
+ */
+export type ConversationMapping$internalConversationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InternalConversation
+   */
+  select?: Prisma.InternalConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InternalConversation
+   */
+  omit?: Prisma.InternalConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InternalConversationInclude<ExtArgs> | null
+  where?: Prisma.InternalConversationWhereInput
 }
 
 /**

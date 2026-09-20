@@ -15,6 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import { isUUID } from 'class-validator';
 import 'dotenv/config';
 import process from 'node:process';
 
@@ -58,6 +59,33 @@ function getEnv(
 
 const toBool = (value: string): boolean => value === 'true';
 const toNumber = (value: string): number => Number(value);
+
+function parseEventTenantMap(value: string): Readonly<Record<string, string>> {
+  if (!value) {
+    return {};
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error('[ENV] EVENT_TENANT_MAP must be a JSON object');
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('[ENV] EVENT_TENANT_MAP must be a JSON object');
+  }
+  const entries = Object.entries(parsed);
+  if (
+    !entries.every(
+      ([eventId, tenantId]) =>
+        isUUID(eventId) && typeof tenantId === 'string' && isUUID(tenantId),
+    )
+  ) {
+    throw new Error(
+      '[ENV] EVENT_TENANT_MAP must contain UUID event and tenant IDs',
+    );
+  }
+  return Object.freeze(Object.fromEntries(entries));
+}
 
 /**
  * Environment variable configuration for the Node-based server.
@@ -142,6 +170,7 @@ export const env = {
   ENCRYPTION_KEY: getEnv('ENCRYPTION_KEY', '', { required: true }),
 
   DEFAULT_TENANT_ID: getEnv('DEFAULT_TENANT_ID', '', { required: true }),
+  EVENT_TENANT_MAP: parseEventTenantMap(getEnv('EVENT_TENANT_MAP', '')),
 
   KEYCLOAK_HEALTH_URL: getEnv('KEYCLOAK_HEALTH_URL', '', { required: true }),
   TEMPO_HEALTH_URL: getEnv('TEMPO_HEALTH_URL', '', { required: true }),

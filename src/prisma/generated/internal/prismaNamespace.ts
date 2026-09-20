@@ -410,6 +410,7 @@ export const ModelName = {
   InternalMessage: 'InternalMessage',
   InternalParticipant: 'InternalParticipant',
   EventAccessProjection: 'EventAccessProjection',
+  UserContactProjection: 'UserContactProjection',
   OutboxMessage: 'OutboxMessage'
 } as const
 
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "template" | "templateVersion" | "notification" | "conversationMapping" | "supportConversation" | "supportMessage" | "messageDelivery" | "supportAssignmentHistory" | "supportQuickReply" | "internalConversation" | "internalMessage" | "internalParticipant" | "eventAccessProjection" | "outboxMessage"
+    modelProps: "template" | "templateVersion" | "notification" | "conversationMapping" | "supportConversation" | "supportMessage" | "messageDelivery" | "supportAssignmentHistory" | "supportQuickReply" | "internalConversation" | "internalMessage" | "internalParticipant" | "eventAccessProjection" | "userContactProjection" | "outboxMessage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1392,6 +1393,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserContactProjection: {
+      payload: Prisma.$UserContactProjectionPayload<ExtArgs>
+      fields: Prisma.UserContactProjectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserContactProjectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserContactProjectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        findFirst: {
+          args: Prisma.UserContactProjectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserContactProjectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        findMany: {
+          args: Prisma.UserContactProjectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>[]
+        }
+        create: {
+          args: Prisma.UserContactProjectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        createMany: {
+          args: Prisma.UserContactProjectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserContactProjectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>[]
+        }
+        delete: {
+          args: Prisma.UserContactProjectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        update: {
+          args: Prisma.UserContactProjectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserContactProjectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserContactProjectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserContactProjectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserContactProjectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserContactProjectionPayload>
+        }
+        aggregate: {
+          args: Prisma.UserContactProjectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserContactProjection>
+        }
+        groupBy: {
+          args: Prisma.UserContactProjectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserContactProjectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserContactProjectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserContactProjectionCountAggregateOutputType> | number
+        }
+      }
+    }
     OutboxMessage: {
       payload: Prisma.$OutboxMessagePayload<ExtArgs>
       fields: Prisma.OutboxMessageFieldRefs
@@ -1570,10 +1645,13 @@ export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[k
 
 export const ConversationMappingScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   channel: 'channel',
   externalId: 'externalId',
   eventId: 'eventId',
   conversationId: 'conversationId',
+  internalConversationId: 'internalConversationId',
+  provider: 'provider',
   mappingType: 'mappingType',
   metadata: 'metadata',
   createdAt: 'createdAt',
@@ -1585,6 +1663,7 @@ export type ConversationMappingScalarFieldEnum = (typeof ConversationMappingScal
 
 export const SupportConversationScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   eventId: 'eventId',
   invitationId: 'invitationId',
   guestUserId: 'guestUserId',
@@ -1630,7 +1709,11 @@ export const SupportMessageScalarFieldEnum = {
   mimeType: 'mimeType',
   status: 'status',
   externalId: 'externalId',
+  provider: 'provider',
   error: 'error',
+  emailMessageId: 'emailMessageId',
+  emailInReplyTo: 'emailInReplyTo',
+  emailReferences: 'emailReferences',
   deliveredAt: 'deliveredAt',
   readAt: 'readAt',
   editedAt: 'editedAt',
@@ -1685,7 +1768,9 @@ export type SupportQuickReplyScalarFieldEnum = (typeof SupportQuickReplyScalarFi
 
 export const InternalConversationScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   eventId: 'eventId',
+  channel: 'channel',
   title: 'title',
   description: 'description',
   type: 'type',
@@ -1705,10 +1790,17 @@ export const InternalMessageScalarFieldEnum = {
   id: 'id',
   conversationId: 'conversationId',
   senderId: 'senderId',
+  direction: 'direction',
+  channel: 'channel',
+  provider: 'provider',
+  externalId: 'externalId',
   body: 'body',
   priority: 'priority',
   createdAt: 'createdAt',
-  editedAt: 'editedAt'
+  editedAt: 'editedAt',
+  emailMessageId: 'emailMessageId',
+  emailInReplyTo: 'emailInReplyTo',
+  emailReferences: 'emailReferences'
 } as const
 
 export type InternalMessageScalarFieldEnum = (typeof InternalMessageScalarFieldEnum)[keyof typeof InternalMessageScalarFieldEnum]
@@ -1737,6 +1829,17 @@ export const EventAccessProjectionScalarFieldEnum = {
 } as const
 
 export type EventAccessProjectionScalarFieldEnum = (typeof EventAccessProjectionScalarFieldEnum)[keyof typeof EventAccessProjectionScalarFieldEnum]
+
+
+export const UserContactProjectionScalarFieldEnum = {
+  userId: 'userId',
+  email: 'email',
+  primaryPhone: 'primaryPhone',
+  displayName: 'displayName',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserContactProjectionScalarFieldEnum = (typeof UserContactProjectionScalarFieldEnum)[keyof typeof UserContactProjectionScalarFieldEnum]
 
 
 export const OutboxMessageScalarFieldEnum = {
@@ -2223,6 +2326,7 @@ export type GlobalOmitConfig = {
   internalMessage?: Prisma.InternalMessageOmit
   internalParticipant?: Prisma.InternalParticipantOmit
   eventAccessProjection?: Prisma.EventAccessProjectionOmit
+  userContactProjection?: Prisma.UserContactProjectionOmit
   outboxMessage?: Prisma.OutboxMessageOmit
 }
 

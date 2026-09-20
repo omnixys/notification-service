@@ -107,6 +107,11 @@ export type InternalParticipant = Prisma.InternalParticipantModel
  */
 export type EventAccessProjection = Prisma.EventAccessProjectionModel
 /**
+ * Model UserContactProjection
+ * 
+ */
+export type UserContactProjection = Prisma.UserContactProjectionModel
+/**
  * Model OutboxMessage
  * 
  */

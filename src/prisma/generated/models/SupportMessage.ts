@@ -46,7 +46,11 @@ export type SupportMessageMinAggregateOutputType = {
   mimeType: string | null
   status: $Enums.MessageStatus | null
   externalId: string | null
+  provider: string | null
   error: string | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
   deliveredAt: Date | null
   readAt: Date | null
   editedAt: Date | null
@@ -67,7 +71,11 @@ export type SupportMessageMaxAggregateOutputType = {
   mimeType: string | null
   status: $Enums.MessageStatus | null
   externalId: string | null
+  provider: string | null
   error: string | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
   deliveredAt: Date | null
   readAt: Date | null
   editedAt: Date | null
@@ -88,7 +96,11 @@ export type SupportMessageCountAggregateOutputType = {
   mimeType: number
   status: number
   externalId: number
+  provider: number
   error: number
+  emailMessageId: number
+  emailInReplyTo: number
+  emailReferences: number
   deliveredAt: number
   readAt: number
   editedAt: number
@@ -119,7 +131,11 @@ export type SupportMessageMinAggregateInputType = {
   mimeType?: true
   status?: true
   externalId?: true
+  provider?: true
   error?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
   deliveredAt?: true
   readAt?: true
   editedAt?: true
@@ -140,7 +156,11 @@ export type SupportMessageMaxAggregateInputType = {
   mimeType?: true
   status?: true
   externalId?: true
+  provider?: true
   error?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
   deliveredAt?: true
   readAt?: true
   editedAt?: true
@@ -161,7 +181,11 @@ export type SupportMessageCountAggregateInputType = {
   mimeType?: true
   status?: true
   externalId?: true
+  provider?: true
   error?: true
+  emailMessageId?: true
+  emailInReplyTo?: true
+  emailReferences?: true
   deliveredAt?: true
   readAt?: true
   editedAt?: true
@@ -269,7 +293,11 @@ export type SupportMessageGroupByOutputType = {
   mimeType: string | null
   status: $Enums.MessageStatus
   externalId: string | null
+  provider: string | null
   error: string | null
+  emailMessageId: string | null
+  emailInReplyTo: string | null
+  emailReferences: string | null
   deliveredAt: Date | null
   readAt: Date | null
   editedAt: Date | null
@@ -313,7 +341,11 @@ export type SupportMessageWhereInput = {
   mimeType?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   status?: Prisma.EnumMessageStatusFilter<"SupportMessage"> | $Enums.MessageStatus
   externalId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  provider?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   error?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   deliveredAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   readAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   editedAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
@@ -336,7 +368,11 @@ export type SupportMessageOrderByWithRelationInput = {
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailReferences?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -350,6 +386,7 @@ export type SupportMessageOrderByWithRelationInput = {
 export type SupportMessageWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   uq_support_message_external?: Prisma.SupportMessageUq_support_message_externalCompoundUniqueInput
+  uq_support_message_provider_external?: Prisma.SupportMessageUq_support_message_provider_externalCompoundUniqueInput
   AND?: Prisma.SupportMessageWhereInput | Prisma.SupportMessageWhereInput[]
   OR?: Prisma.SupportMessageWhereInput[]
   NOT?: Prisma.SupportMessageWhereInput | Prisma.SupportMessageWhereInput[]
@@ -363,7 +400,11 @@ export type SupportMessageWhereUniqueInput = Prisma.AtLeast<{
   mimeType?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   status?: Prisma.EnumMessageStatusFilter<"SupportMessage"> | $Enums.MessageStatus
   externalId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  provider?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   error?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   deliveredAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   readAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   editedAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
@@ -372,7 +413,7 @@ export type SupportMessageWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"SupportMessage"> | Date | string
   conversation?: Prisma.XOR<Prisma.SupportConversationScalarRelationFilter, Prisma.SupportConversationWhereInput>
   deliveries?: Prisma.MessageDeliveryListRelationFilter
-}, "id" | "uq_support_message_external">
+}, "id" | "uq_support_message_external" | "uq_support_message_provider_external">
 
 export type SupportMessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -386,7 +427,11 @@ export type SupportMessageOrderByWithAggregationInput = {
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailReferences?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -415,7 +460,11 @@ export type SupportMessageScalarWhereWithAggregatesInput = {
   mimeType?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
   status?: Prisma.EnumMessageStatusWithAggregatesFilter<"SupportMessage"> | $Enums.MessageStatus
   externalId?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
+  provider?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
   error?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
+  emailMessageId?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
+  emailReferences?: Prisma.StringNullableWithAggregatesFilter<"SupportMessage"> | string | null
   deliveredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SupportMessage"> | Date | string | null
   readAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SupportMessage"> | Date | string | null
   editedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SupportMessage"> | Date | string | null
@@ -435,7 +484,11 @@ export type SupportMessageCreateInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -458,7 +511,11 @@ export type SupportMessageUncheckedCreateInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -479,7 +536,11 @@ export type SupportMessageUpdateInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -502,7 +563,11 @@ export type SupportMessageUncheckedUpdateInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -524,7 +589,11 @@ export type SupportMessageCreateManyInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -544,7 +613,11 @@ export type SupportMessageUpdateManyMutationInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -565,7 +638,11 @@ export type SupportMessageUncheckedUpdateManyInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -589,6 +666,11 @@ export type SupportMessageUq_support_message_externalCompoundUniqueInput = {
   externalId: string
 }
 
+export type SupportMessageUq_support_message_provider_externalCompoundUniqueInput = {
+  provider: string
+  externalId: string
+}
+
 export type SupportMessageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
@@ -601,7 +683,11 @@ export type SupportMessageCountOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   status?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
   deliveredAt?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
@@ -626,7 +712,11 @@ export type SupportMessageMaxOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   status?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
   deliveredAt?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
@@ -647,7 +737,11 @@ export type SupportMessageMinOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   status?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  emailMessageId?: Prisma.SortOrder
+  emailInReplyTo?: Prisma.SortOrder
+  emailReferences?: Prisma.SortOrder
   deliveredAt?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
@@ -740,7 +834,11 @@ export type SupportMessageCreateWithoutConversationInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -761,7 +859,11 @@ export type SupportMessageUncheckedCreateWithoutConversationInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -812,7 +914,11 @@ export type SupportMessageScalarWhereInput = {
   mimeType?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   status?: Prisma.EnumMessageStatusFilter<"SupportMessage"> | $Enums.MessageStatus
   externalId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  provider?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   error?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailMessageId?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailInReplyTo?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
+  emailReferences?: Prisma.StringNullableFilter<"SupportMessage"> | string | null
   deliveredAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   readAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
   editedAt?: Prisma.DateTimeNullableFilter<"SupportMessage"> | Date | string | null
@@ -832,7 +938,11 @@ export type SupportMessageCreateWithoutDeliveriesInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -854,7 +964,11 @@ export type SupportMessageUncheckedCreateWithoutDeliveriesInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -890,7 +1004,11 @@ export type SupportMessageUpdateWithoutDeliveriesInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -912,7 +1030,11 @@ export type SupportMessageUncheckedUpdateWithoutDeliveriesInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -932,7 +1054,11 @@ export type SupportMessageCreateManyConversationInput = {
   mimeType?: string | null
   status?: $Enums.MessageStatus
   externalId?: string | null
+  provider?: string | null
   error?: string | null
+  emailMessageId?: string | null
+  emailInReplyTo?: string | null
+  emailReferences?: string | null
   deliveredAt?: Date | string | null
   readAt?: Date | string | null
   editedAt?: Date | string | null
@@ -952,7 +1078,11 @@ export type SupportMessageUpdateWithoutConversationInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -973,7 +1103,11 @@ export type SupportMessageUncheckedUpdateWithoutConversationInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -994,7 +1128,11 @@ export type SupportMessageUncheckedUpdateManyWithoutConversationInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMessageStatusFieldUpdateOperationsInput | $Enums.MessageStatus
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailInReplyTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailReferences?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1046,7 +1184,11 @@ export type SupportMessageSelect<ExtArgs extends runtime.Types.Extensions.Intern
   mimeType?: boolean
   status?: boolean
   externalId?: boolean
+  provider?: boolean
   error?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   deliveredAt?: boolean
   readAt?: boolean
   editedAt?: boolean
@@ -1070,7 +1212,11 @@ export type SupportMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   mimeType?: boolean
   status?: boolean
   externalId?: boolean
+  provider?: boolean
   error?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   deliveredAt?: boolean
   readAt?: boolean
   editedAt?: boolean
@@ -1092,7 +1238,11 @@ export type SupportMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   mimeType?: boolean
   status?: boolean
   externalId?: boolean
+  provider?: boolean
   error?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   deliveredAt?: boolean
   readAt?: boolean
   editedAt?: boolean
@@ -1114,7 +1264,11 @@ export type SupportMessageSelectScalar = {
   mimeType?: boolean
   status?: boolean
   externalId?: boolean
+  provider?: boolean
   error?: boolean
+  emailMessageId?: boolean
+  emailInReplyTo?: boolean
+  emailReferences?: boolean
   deliveredAt?: boolean
   readAt?: boolean
   editedAt?: boolean
@@ -1123,7 +1277,7 @@ export type SupportMessageSelectScalar = {
   createdAt?: boolean
 }
 
-export type SupportMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "direction" | "channel" | "fromUserId" | "fromGuest" | "body" | "mediaUrl" | "mimeType" | "status" | "externalId" | "error" | "deliveredAt" | "readAt" | "editedAt" | "editCount" | "deletedAt" | "createdAt", ExtArgs["result"]["supportMessage"]>
+export type SupportMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "direction" | "channel" | "fromUserId" | "fromGuest" | "body" | "mediaUrl" | "mimeType" | "status" | "externalId" | "provider" | "error" | "emailMessageId" | "emailInReplyTo" | "emailReferences" | "deliveredAt" | "readAt" | "editedAt" | "editCount" | "deletedAt" | "createdAt", ExtArgs["result"]["supportMessage"]>
 export type SupportMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.SupportConversationDefaultArgs<ExtArgs>
   deliveries?: boolean | Prisma.SupportMessage$deliveriesArgs<ExtArgs>
@@ -1154,7 +1308,11 @@ export type $SupportMessagePayload<ExtArgs extends runtime.Types.Extensions.Inte
     mimeType: string | null
     status: $Enums.MessageStatus
     externalId: string | null
+    provider: string | null
     error: string | null
+    emailMessageId: string | null
+    emailInReplyTo: string | null
+    emailReferences: string | null
     deliveredAt: Date | null
     readAt: Date | null
     editedAt: Date | null
@@ -1597,7 +1755,11 @@ export interface SupportMessageFieldRefs {
   readonly mimeType: Prisma.FieldRef<"SupportMessage", 'String'>
   readonly status: Prisma.FieldRef<"SupportMessage", 'MessageStatus'>
   readonly externalId: Prisma.FieldRef<"SupportMessage", 'String'>
+  readonly provider: Prisma.FieldRef<"SupportMessage", 'String'>
   readonly error: Prisma.FieldRef<"SupportMessage", 'String'>
+  readonly emailMessageId: Prisma.FieldRef<"SupportMessage", 'String'>
+  readonly emailInReplyTo: Prisma.FieldRef<"SupportMessage", 'String'>
+  readonly emailReferences: Prisma.FieldRef<"SupportMessage", 'String'>
   readonly deliveredAt: Prisma.FieldRef<"SupportMessage", 'DateTime'>
   readonly readAt: Prisma.FieldRef<"SupportMessage", 'DateTime'>
   readonly editedAt: Prisma.FieldRef<"SupportMessage", 'DateTime'>

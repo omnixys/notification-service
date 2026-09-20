@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import test from 'node:test';
 
 const EVENT_ID = '2dae12d9-025f-72cd-a285-87130fd6f63e';
+const TENANT_ID = '6e788f7f-c233-4cb8-bbde-c0b855e564be';
 const USER_ID = '01a0be87-2742-717c-8b68-e573f807a633';
 
 function makeFakeValkey() {
@@ -97,6 +98,10 @@ async function createService(prisma, valkey, invitationClient) {
     { getPermissionsForUser: async () => [] },
     undefined,
     invitationClient,
+    {
+      requireEventTenant: () => TENANT_ID,
+      requireCurrentTenant: () => TENANT_ID,
+    },
   );
 }
 

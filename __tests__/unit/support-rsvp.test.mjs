@@ -328,6 +328,10 @@ async function createConversationService(store, valkey) {
         throw new InvitationSupportValidationException('NO_MATCH', 'no invitation for user');
       },
     },
+    {
+      requireEventTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+      requireCurrentTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+    },
   );
   return svc;
 }
@@ -486,10 +490,20 @@ test('markAsRead – guest and staff clear only their own unread counter', async
   const { ConversationService } = await import(
     '../../dist/modules/support/modules/conversation/conversation.service.js'
   );
-  const svc = new ConversationService(prisma, makeFakeValkey(), {
-    getPermissionsForUser: async (userId) =>
-      userId === 'staff-user' ? ['support.view'] : [],
-  });
+  const svc = new ConversationService(
+    prisma,
+    makeFakeValkey(),
+    {
+      getPermissionsForUser: async (userId) =>
+        userId === 'staff-user' ? ['support.view'] : [],
+    },
+    undefined,
+    undefined,
+    {
+      requireEventTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+      requireCurrentTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+    },
+  );
 
   const guestResult = await svc.markAsRead('conv-unread', { id: 'guest-user' });
   assert.equal(guestResult.unreadCount, 3);
@@ -519,6 +533,10 @@ async function createMessageService(store) {
     {},
     {},
     logger,
+    {
+      requireEventTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+      requireCurrentTenant: () => '6e788f7f-c233-4cb8-bbde-c0b855e564be',
+    },
   );
   return svc;
 }

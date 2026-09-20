@@ -22,6 +22,7 @@ import {
   EventAccessDTO,
   EventCancelNotificationDTO,
   EventIdsDTO,
+  UserProjectionChangedDTO,
 } from '@omnixys/contracts-ts';
 import {
   KafkaEvent,
@@ -106,6 +107,27 @@ export class EventHandler {
     });
   }
 
+  @KafkaEvent(KafkaTopics.user.changedProjection)
+  async handleUserProjectionChanged(
+    payload: UserProjectionChangedDTO,
+    _context: IKafkaEventContext,
+  ): Promise<void> {
+    await this.prisma.userContactProjection.upsert({
+      where: { userId: payload.id },
+      create: {
+        userId: payload.id,
+        email: normalizeEmail(payload.email),
+        primaryPhone: normalizePhone(payload.primaryPhone),
+        displayName: payload.displayName?.trim() || null,
+      },
+      update: {
+        email: normalizeEmail(payload.email),
+        primaryPhone: normalizePhone(payload.primaryPhone),
+        displayName: payload.displayName?.trim() || null,
+      },
+    });
+  }
+
   @KafkaEvent(KafkaTopics.notification.eventCancelled)
   async handleNotifyEventCancelled(
     payload: EventCancelNotificationDTO,
@@ -155,4 +177,14 @@ export class EventHandler {
       }
     });
   }
+}
+
+function normalizeEmail(value: string | null | undefined): string | null {
+  const normalized = value?.trim().toLowerCase();
+  return normalized || null;
+}
+
+function normalizePhone(value: string | null | undefined): string | null {
+  const normalized = value?.replace(/[^\d+]/g, '').replace(/^00/, '+');
+  return normalized || null;
 }

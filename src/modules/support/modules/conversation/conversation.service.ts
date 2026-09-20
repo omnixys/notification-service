@@ -4,6 +4,7 @@ import {
 } from '../../../../modules/notification/errors/notification.error.js';
 import type { Prisma, SupportConversation } from '../../../../prisma/generated/client.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { TenantRouteService } from '../../common/tenant-route.service.js';
 import {
   InvitationSupportClientService,
   InvitationSupportValidationException,
@@ -25,11 +26,13 @@ export class ConversationService {
     private readonly permissionResolver: EventPermissionResolver,
     private readonly mappings: MappingService,
     private readonly invitationClient: InvitationSupportClientService,
+    private readonly tenantRoutes: TenantRouteService = new TenantRouteService(),
   ) {}
 
   async findById(id: string, user: CurrentUserData): Promise<SupportConversation> {
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id },
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
+    const conversation = await this.prisma.supportConversation.findFirst({
+      where: { id, tenantId },
     });
 
     if (!conversation) {
@@ -44,19 +47,21 @@ export class ConversationService {
   }
 
   async findByEvent(eventId: string, user: CurrentUserData): Promise<SupportConversation[]> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     if (!(await this.hasEventPermission(eventId, user, EventPermissionKey.ViewSupport))) {
       throw new ConversationAccessDeniedException(eventId, 'support-view-required');
     }
 
     return this.prisma.supportConversation.findMany({
-      where: { eventId },
+      where: { eventId, tenantId },
       orderBy: { updatedAt: 'desc' },
     });
   }
 
   async findByUser(userId: string): Promise<SupportConversation[]> {
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
     return this.prisma.supportConversation.findMany({
-      where: { guestUserId: userId },
+      where: { guestUserId: userId, tenantId },
       orderBy: { updatedAt: 'desc' },
     });
   }
@@ -65,9 +70,11 @@ export class ConversationService {
     eventId: string,
     invitationId: string,
   ): Promise<SupportConversation | null> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     return this.prisma.supportConversation.findFirst({
       where: {
         eventId,
+        tenantId,
         invitationId,
         deletedAt: null,
         status: { not: 'CLOSED' },
@@ -125,9 +132,11 @@ export class ConversationService {
       firstMessage: string;
     },
   ): Promise<SupportConversation> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     const existing = await this.prisma.supportConversation.findFirst({
       where: {
         eventId,
+        tenantId,
         invitationId: data.invitationId,
         status: { not: 'CLOSED' },
       },
@@ -156,8 +165,9 @@ export class ConversationService {
     eventId: string,
     invitationId: string,
   ): Promise<SupportConversation> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     const conversation = await this.prisma.supportConversation.findFirst({
-      where: { eventId, invitationId },
+      where: { eventId, tenantId, invitationId },
     });
 
     if (!conversation) {
@@ -180,6 +190,7 @@ export class ConversationService {
       firstMessage: string;
     },
   ): Promise<SupportConversation> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     const firstMessage = data.firstMessage.trim();
     if (!firstMessage) {
       throw new Error('A first support message is required');
@@ -189,6 +200,7 @@ export class ConversationService {
       ? await this.prisma.supportConversation.findFirst({
           where: {
             eventId,
+            tenantId,
             guestUserId: data.guestUserId,
             status: { not: 'CLOSED' },
           },
@@ -211,6 +223,7 @@ export class ConversationService {
       ? await this.prisma.supportConversation.findFirst({
           where: {
             eventId,
+            tenantId,
             invitationId: data.invitationId,
             status: { not: 'CLOSED' },
           },
@@ -221,6 +234,7 @@ export class ConversationService {
       this.#logger.debug(
         {
           eventId,
+          tenantId,
           invitationId: data.invitationId,
           existingId: existingByInvitation.id,
         },
@@ -233,6 +247,7 @@ export class ConversationService {
     try {
       conversation = await this.prisma.supportConversation.create({
         data: {
+          tenantId,
           eventId,
           invitationId: data.invitationId,
           guestUserId: data.guestUserId,
@@ -295,6 +310,7 @@ export class ConversationService {
         normalizeSupportExternalId(data.guestContact),
         eventId,
         conversation.id,
+        tenantId,
       );
     }
 
@@ -358,11 +374,12 @@ export class ConversationService {
     user: CurrentUserData,
     status?: 'OPEN' | 'ASSIGNED' | 'CLOSED',
   ): Promise<number> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     if (!(await this.hasEventPermission(eventId, user, EventPermissionKey.ViewSupport))) {
       throw new ConversationAccessDeniedException(eventId, 'support-view-required');
     }
 
-    const where: Prisma.SupportConversationWhereInput = { eventId };
+    const where: Prisma.SupportConversationWhereInput = { eventId, tenantId };
 
     if (status) {
       where.status = status;
@@ -375,14 +392,16 @@ export class ConversationService {
     eventId: string,
     user: CurrentUserData,
   ): Promise<SupportConversation[]> {
+    const tenantId = this.tenantRoutes.requireEventTenant(eventId);
     if (!(await this.hasEventPermission(eventId, user, EventPermissionKey.ViewSupport))) {
       throw new ConversationAccessDeniedException(eventId, 'support-view-required');
     }
 
     return this.prisma.supportConversation.findMany({
-      where: { eventId, deletedAt: null },
+      where: { eventId, tenantId, deletedAt: null },
       select: {
         id: true,
+        tenantId: true,
         eventId: true,
         invitationId: true,
         guestUserId: true,
@@ -417,8 +436,9 @@ export class ConversationService {
   }
 
   async markAsRead(conversationId: string, user: CurrentUserData): Promise<SupportConversation> {
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id: conversationId },
+    const tenantId = this.tenantRoutes.requireCurrentTenant();
+    const conversation = await this.prisma.supportConversation.findFirst({
+      where: { id: conversationId, tenantId },
     });
 
     if (!conversation) {
@@ -513,7 +533,14 @@ export class ConversationService {
     return permissions.includes(permission);
   }
 
-  async canUserViewEventSupport(eventId: string, userId: string): Promise<boolean> {
+  async canUserViewEventSupport(
+    eventId: string,
+    userId: string,
+    tenantId?: string,
+  ): Promise<boolean> {
+    if (!tenantId || this.tenantRoutes.requireEventTenant(eventId) !== tenantId) {
+      return false;
+    }
     const permissions = await this.permissionResolver.getPermissionsForUser(userId, eventId);
     return permissions.includes(EventPermissionKey.ViewSupport);
   }
@@ -521,9 +548,13 @@ export class ConversationService {
   async canUserAccessSubscription(
     conversationId: string,
     userId: string,
+    tenantId?: string,
   ): Promise<{ allowed: boolean; eventId?: string }> {
-    const conversation = await this.prisma.supportConversation.findUnique({
-      where: { id: conversationId },
+    if (!tenantId) {
+      return { allowed: false };
+    }
+    const conversation = await this.prisma.supportConversation.findFirst({
+      where: { id: conversationId, tenantId },
       select: { eventId: true, guestUserId: true },
     });
     if (!conversation) {
@@ -533,7 +564,7 @@ export class ConversationService {
       return { allowed: true, eventId: conversation.eventId };
     }
     return {
-      allowed: await this.canUserViewEventSupport(conversation.eventId, userId),
+      allowed: await this.canUserViewEventSupport(conversation.eventId, userId, tenantId),
       eventId: conversation.eventId,
     };
   }
