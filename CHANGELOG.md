@@ -3,6 +3,31 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.2.0](https://github.com/omnixys/notification-service/compare/v4.1.1...v4.2.0) (2026-09-21)
+
+### Config
+
+* **Config:** require critical env vars in development and staging ([](https://github.com/omnixys/notification-service/commit/a4a68b5f2552a298c0e2c0af83057e76a3c7dbb1))
+* **Config:** require critical env vars in production ([](https://github.com/omnixys/notification-service/commit/9f4e2894c80f524a8f258a1c9bc8d8044392ac8f))
+
+### Deps
+
+* **Deps:** update omnixys packages ([](https://github.com/omnixys/notification-service/commit/ae9d59cee583baedb5803627a5e4015f06ec933c))
+
+### Notification
+
+* **Notification:** tenant-scoped conversation routing with outbox and internal channel read model ([](https://github.com/omnixys/notification-service/commit/7ceefac1594f1ecdf08d0061ddf5fe39504b97ad))
+* **Notification:** apply pending updates and lint fixes ([](https://github.com/omnixys/notification-service/commit/96ec28379b8c4c7db99945109278eb49dd54de30))
+
+### Subscriptions
+
+* **Subscriptions:** validate internal tenant route without request context ([](https://github.com/omnixys/notification-service/commit/28651214085a454554900b9de9c604404a84342b))
+
+### Support
+
+* **Support:** authorize support chat via invitation fallback ([](https://github.com/omnixys/notification-service/commit/d523093588b7f957b39d1d1a10745eadbab6e700))
+* **Support:** persist whatsapp inbound messages ([](https://github.com/omnixys/notification-service/commit/dfb7e0fb956d9d73076114183d31c0f510895faf))
+
 ## [4.1.1](https://github.com/omnixys/notification-service/compare/v4.1.0...v4.1.1) (2026-09-16)
 
 ### Deps
