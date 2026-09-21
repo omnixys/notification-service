@@ -10,11 +10,11 @@ import type {
   SupportMessage,
 } from '../../../../prisma/generated/client.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { toApiChannel } from '../../../internal/entities/internal-conversation.entity.js';
+import type { InternalConversationChannel } from '../../../internal/entities/internal-conversation.entity.js';
 import { TenantRouteService } from '../../common/tenant-route.service.js';
 import { MappingService, normalizeSupportExternalId } from '../mapping/mapping.service.js';
 import { ConversationOutboxService } from '../outbox/conversation-outbox.service.js';
-import { toApiChannel } from '../../../internal/entities/internal-conversation.entity.js';
-import type { InternalConversationChannel } from '../../../internal/entities/internal-conversation.entity.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ValkeyPubSubService } from '@omnixys/cache-ts';
 import { EventPermissionKey } from '@omnixys/contracts-ts';
@@ -687,7 +687,7 @@ export class MessageService {
           tenantId: data.tenantId,
           eventId: data.eventId,
           channel: 'WHATSAPP',
-          title: staff.displayName || data.senderName?.trim() || canonicalFrom,
+          title: staff.displayName ?? data.senderName?.trim() ?? canonicalFrom,
           type: 'DIRECT',
           participantHash,
           createdBy: staff.userId,
@@ -776,7 +776,7 @@ export class MessageService {
     });
   }
 
-private enqueueInternalMessageEvent(
+  private enqueueInternalMessageEvent(
     tx: Parameters<ConversationOutboxService['enqueue']>[0],
     message: InternalMessage,
     participantIds: string[],

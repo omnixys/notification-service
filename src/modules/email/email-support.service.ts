@@ -466,7 +466,7 @@ export class EmailSupportService {
           tenantId,
           eventId,
           channel: 'EMAIL',
-          title: staff.displayName || this.extractName(payload.from),
+          title: staff.displayName ?? this.extractName(payload.from),
           type: 'DIRECT',
           participantHash,
           createdBy: staff.userId,

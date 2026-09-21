@@ -31,10 +31,10 @@ registerEnumType(InternalMessagePriority, { name: 'InternalMessagePriority' });
 // internal-conversation channel surface (IN_APP). Support conversations keep
 // their inbound provider channel (WHATSAPP / EMAIL) untouched.
 export function toApiChannel(channel: string): InternalConversationChannel {
-  if (channel === InternalConversationChannel.WHATSAPP) {
+  if (channel === 'WHATSAPP') {
     return InternalConversationChannel.WHATSAPP;
   }
-  if (channel === InternalConversationChannel.EMAIL) {
+  if (channel === 'EMAIL') {
     return InternalConversationChannel.EMAIL;
   }
   return InternalConversationChannel.IN_APP;

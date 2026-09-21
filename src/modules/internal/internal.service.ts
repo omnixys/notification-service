@@ -5,7 +5,10 @@ import type {
   Prisma,
 } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { toApiChannel, InternalConversationChannel } from '../internal/entities/internal-conversation.entity.js';
+import {
+  toApiChannel,
+  InternalConversationChannel,
+} from '../internal/entities/internal-conversation.entity.js';
 import {
   ConversationAccessDeniedException,
   ConversationNotFoundException,
@@ -67,9 +70,11 @@ export class InternalService {
   }
 
   private async countUnreadMessages(
-    conversations: Prisma.InternalConversationGetPayload<{
-      include: { participants: true };
-    }>[],
+    conversations: Array<
+      Prisma.InternalConversationGetPayload<{
+        include: { participants: true };
+      }>
+    >,
     userId: string,
   ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();

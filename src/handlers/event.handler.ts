@@ -118,12 +118,12 @@ export class EventHandler {
         userId: payload.id,
         email: normalizeEmail(payload.email),
         primaryPhone: normalizePhone(payload.primaryPhone),
-        displayName: payload.displayName?.trim() || null,
+        displayName: payload.displayName?.trim() ?? null,
       },
       update: {
         email: normalizeEmail(payload.email),
         primaryPhone: normalizePhone(payload.primaryPhone),
-        displayName: payload.displayName?.trim() || null,
+        displayName: payload.displayName?.trim() ?? null,
       },
     });
   }
@@ -181,10 +181,10 @@ export class EventHandler {
 
 function normalizeEmail(value: string | null | undefined): string | null {
   const normalized = value?.trim().toLowerCase();
-  return normalized || null;
+  return normalized ?? null;
 }
 
 function normalizePhone(value: string | null | undefined): string | null {
   const normalized = value?.replace(/[^\d+]/g, '').replace(/^00/, '+');
-  return normalized || null;
+  return normalized ?? null;
 }

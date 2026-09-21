@@ -1,6 +1,4 @@
-import type {
-  InternalParticipant as PrismaInternalParticipant,
-} from '../../prisma/generated/client.js';
+import type { InternalParticipant as PrismaInternalParticipant } from '../../prisma/generated/client.js';
 import {
   InternalConversation,
   InternalConversationType,
@@ -29,8 +27,13 @@ export class InternalResolver {
     @Args('eventId') eventId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<InternalConversation[]> {
-    const conversations = await this.internalService.findConversations(eventId, user);
-    return conversations.map(mapConversationChannel) as unknown as InternalConversation[];
+    const conversations = await this.internalService.findConversations(
+      eventId,
+      user,
+    );
+    return conversations.map(
+      mapConversationChannel,
+    ) as unknown as InternalConversation[];
   }
 
   @Query(() => InternalConversation)
@@ -39,8 +42,13 @@ export class InternalResolver {
     @Args('id') id: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<InternalConversation> {
-    const conversation = await this.internalService.findConversationById(id, user);
-    return mapConversationChannel(conversation) as unknown as InternalConversation;
+    const conversation = await this.internalService.findConversationById(
+      id,
+      user,
+    );
+    return mapConversationChannel(
+      conversation,
+    ) as unknown as InternalConversation;
   }
 
   @Query(() => [InternalMessage])
@@ -50,7 +58,11 @@ export class InternalResolver {
     @CurrentUser() user: CurrentUserData,
     @Args('limit', { nullable: true, type: () => Number }) limit?: number,
   ): Promise<InternalMessage[]> {
-    const messages = await this.internalService.findMessages(conversationId, user, limit);
+    const messages = await this.internalService.findMessages(
+      conversationId,
+      user,
+      limit,
+    );
     return messages.map(mapMessageChannel) as unknown as InternalMessage[];
   }
 
@@ -76,7 +88,9 @@ export class InternalResolver {
       },
       user,
     );
-    return mapConversationChannel(conversation) as unknown as InternalConversation;
+    return mapConversationChannel(
+      conversation,
+    ) as unknown as InternalConversation;
   }
 
   @Mutation(() => InternalMessage)
@@ -114,7 +128,12 @@ export class InternalResolver {
     @CurrentUser() user: CurrentUserData,
     @Args('id') id: string,
   ): Promise<InternalConversation> {
-    const conversation = await this.internalService.archiveConversation(id, user);
-    return mapConversationChannel(conversation) as unknown as InternalConversation;
+    const conversation = await this.internalService.archiveConversation(
+      id,
+      user,
+    );
+    return mapConversationChannel(
+      conversation,
+    ) as unknown as InternalConversation;
   }
 }

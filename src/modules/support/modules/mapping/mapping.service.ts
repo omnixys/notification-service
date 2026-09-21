@@ -172,17 +172,18 @@ export class MappingService {
     });
     const mapped = mappings.filter(({ conversation, internalConversation }) =>
       Boolean(
-        (conversation && !conversation.deletedAt && conversation.status !== 'CLOSED') ||
-        (internalConversation && internalConversation.isActive),
+        (conversation?.deletedAt === null && conversation.status !== 'CLOSED') ||
+        internalConversation?.isActive === true,
       ),
     );
-    if (mapped.length === 1 && mapped[0]?.eventId) {
+    const [mapping] = mapped;
+    if (mapping?.eventId) {
       return {
-        conversationId: mapped[0].conversationId ?? null,
-        ...(mapped[0].internalConversationId
-          ? { internalConversationId: mapped[0].internalConversationId }
+        conversationId: mapping.conversationId ?? null,
+        ...(mapping.internalConversationId
+          ? { internalConversationId: mapping.internalConversationId }
           : {}),
-        eventId: mapped[0].eventId,
+        eventId: mapping.eventId,
         created: false,
       };
     }

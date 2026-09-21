@@ -83,7 +83,9 @@ export class BannerService implements OnApplicationBootstrap {
 
       const section = getLogEnvSection(key);
 
-      groups.get(section)?.push([key, String(value)]);
+      groups
+        .get(section)
+        ?.push([key, typeof value === 'string' ? value : (JSON.stringify(value) ?? '')]);
     }
 
     for (const section of LOG_ENV_SECTION_ORDER) {

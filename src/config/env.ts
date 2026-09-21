@@ -170,7 +170,9 @@ export const env = {
   ENCRYPTION_KEY: getEnv('ENCRYPTION_KEY', '', { required: true }),
 
   DEFAULT_TENANT_ID: getEnv('DEFAULT_TENANT_ID', '', { required: true }),
-  EVENT_TENANT_MAP: parseEventTenantMap(getEnv('EVENT_TENANT_MAP', '', {required: true})),
+  EVENT_TENANT_MAP: parseEventTenantMap(
+    getEnv('EVENT_TENANT_MAP', '', { required: true }),
+  ),
 
   KEYCLOAK_HEALTH_URL: getEnv('KEYCLOAK_HEALTH_URL', '', { required: true }),
   TEMPO_HEALTH_URL: getEnv('TEMPO_HEALTH_URL', '', { required: true }),

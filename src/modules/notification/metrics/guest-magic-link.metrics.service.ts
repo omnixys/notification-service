@@ -24,7 +24,12 @@ export class GuestMagicLinkMetricsService {
     this.failuresByChannel[channel] += 1;
   }
 
-  snapshot() {
+  snapshot(): {
+    dispatched: number;
+    failures: number;
+    byChannel: Record<GuestMagicLinkChannel, number>;
+    failuresByChannel: Record<GuestMagicLinkChannel, number>;
+  } {
     return {
       dispatched: this.dispatched,
       failures: this.failures,
