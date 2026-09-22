@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.2.1](https://github.com/omnixys/notification-service/compare/v4.2.0...v4.2.1) (2026-09-22)
+
+### Deps
+
+* **Deps:** update omnixys package.json script add migrate deploy ([](https://github.com/omnixys/notification-service/commit/0804e41acf2460d8a82641543aa4c7322b6aff80))
+
 ## [4.2.0](https://github.com/omnixys/notification-service/compare/v4.1.1...v4.2.0) (2026-09-21)
 
 ### Config
