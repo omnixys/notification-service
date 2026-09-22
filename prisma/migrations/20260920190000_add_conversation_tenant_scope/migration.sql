@@ -5,7 +5,7 @@ ALTER TABLE "conversation_mapping" ADD COLUMN "tenant_id" UUID;
 ALTER TABLE "support_conversation" ADD COLUMN "tenant_id" UUID;
 ALTER TABLE "internal_conversation" ADD COLUMN "tenant_id" UUID;
 
-ALTER TABLE "conversation_mapping" DROP CONSTRAINT "uq_conversation_mapping";
+DROP INDEX "conversation_mapping_channel_external_id_event_id_key";
 ALTER TABLE "conversation_mapping"
   ADD CONSTRAINT "uq_conversation_mapping" UNIQUE ("tenant_id", "channel", "external_id", "event_id");
 

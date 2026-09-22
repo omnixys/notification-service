@@ -57,7 +57,8 @@
     "prisma:push": "prisma db push",
     "prisma:pull": "prisma db pull",
     "generate": "pnpm prisma format && pnpm prisma validate && prisma generate",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "migrate": "prisma migrate deploy"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
